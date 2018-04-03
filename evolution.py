@@ -33,7 +33,7 @@ class Species(object):
     def act(self, observation, strain_index):
         self.model.set_weights(self.strains[strain_index])
         y = self.model.predict(np.array([observation]), batch_size=1)
-        return y[0],self.strains[strain_index]
+        return y[0]
 
     def record(self, reward, strain_index):
         self.nextGen.append((reward,self.strains[strain_index]))
@@ -45,6 +45,9 @@ class Species(object):
 
     def get_best_reward(self):
         return self.best
+
+    def is_ready_to_evolve(self):
+        return len(self.strains) == len(self.nextGen)
 
     def evolve(self):
 
