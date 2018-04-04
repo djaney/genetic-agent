@@ -27,7 +27,7 @@ def main(args):
 			cmd = data[0]
 			idx = int(data[1])
 			inp = data[2]
-			res = ''
+			res = None
 
 			if 'act' == cmd:
 				inp = inp.split(',')
@@ -46,7 +46,8 @@ def main(args):
 		except Exception as e:
 			res = "error {0}".format(repr(e))
 
-		s.sendto(res.encode(), addr)
+		if res != None:
+			s.sendto(res.encode(), addr)
 
 
 
