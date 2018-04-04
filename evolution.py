@@ -14,7 +14,7 @@ class Species(object):
     """
     def __init__(self, strain_count = 10, mutation_chance=0.001, model_yaml= None):
         self.strains = []
-        self.nextGen = []
+        self.next_gen = []
         self.strain_count = strain_count
 
         if model_yaml == None:
@@ -36,7 +36,9 @@ class Species(object):
         return y[0]
 
     def record(self, reward, strain_index):
-        self.nextGen.append((reward,self.strains[strain_index]))
+        hit = len([s for s in self.next_gen if s[2] == strain_index])
+        if 0 == hit:
+            self.next_gen.append((reward,self.strains[strain_index], strain_index))
 
     def create_model(self):
         a = Input(shape=(4,))
@@ -47,21 +49,21 @@ class Species(object):
         return self.best
 
     def is_ready_to_evolve(self):
-        return len(self.strains) == len(self.nextGen)
+        return len(self.strains) == len(self.next_gen)
 
     def evolve(self):
 
         # find fittest
-        self.nextGen = sorted(self.nextGen, key=lambda item: item[0], reverse=True)
+        self.next_gen = sorted(self.next_gen, key=lambda item: item[0], reverse=True)
         # breed
-        father = self.nextGen[0][1]
-        mother = self.nextGen[1][1]
-        self.best = self.nextGen[0][0]
+        father = self.next_gen[0][1]
+        mother = self.next_gen[1][1]
+        self.best = self.next_gen[0][0]
 
         # get the shape of each layer
         shapes = [l.shape for l in father]
         self.strains = []
-        self.nextGen = []
+        self.next_gen = []
 
 
         # add the best strain back into the pool

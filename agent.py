@@ -37,9 +37,12 @@ def main(args):
 				res = [str(i) for i in res]
 				res = ','.join(res)
 			elif 'rec' == cmd:
+				inp = float(inp)
 				agent.record(inp,idx)
+				print('rec {} score {}, {} remaining'.format(idx, inp, len(agent.strains) - len(agent.next_gen)))
 				if agent.is_ready_to_evolve():
 					agent.evolve()
+					print('evolve')
 					res = '1'
 				else:
 					res = '0'
