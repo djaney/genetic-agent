@@ -12,15 +12,14 @@ class Species(object):
 
 
     """
-    def __init__(self, strain_count = 10, mutation_chance=0.001, model_yaml= None):
+    def __init__(self, strain_count = 10, mutation_chance=0.001, model_factory=None):
         self.strains = []
         self.next_gen = []
         self.strain_count = strain_count
 
-        if model_yaml == None:
-            self.model = model_from_yaml(model_from_yaml(model_yaml))
-        else:
-            self.model = self.create_model()
+        self.model_factory = model_factory
+
+        self.model = self.create_model()
         self.mutation_chance = mutation_chance
         self.best = 0
 
@@ -41,9 +40,10 @@ class Species(object):
             self.next_gen.append((reward,self.strains[strain_index], strain_index))
 
     def create_model(self):
-        a = Input(shape=(4,))
-        b = Dense(2)(a)
-        return Model(inputs=a, outputs=b)
+        if None == self.model_factory:
+            raise Exception('No model factory')
+        factory = __import__(self.model_factory, globals(), locals(), ['create'])
+        return factory.create()
 
     def get_best_reward(self):
         return self.best

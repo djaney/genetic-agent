@@ -4,16 +4,12 @@ import argparse
 import socket
 
 parser = argparse.ArgumentParser(description='Genetic algorithm agent')
-parser.add_argument('model_yaml_path',
-                    help='path to yaml containing model information')
+parser.add_argument('model_factory',
+                    help='import path of model factory')
 
 def main(args):
-	with open(args.model_yaml_path) as f:
-		yaml_string = f.read()
 
-	agent = Species(model_yaml=yaml_string)
-
-
+	agent = Species(model_factory=args.model_factory)
 	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	s.bind(('', 8888))
 	print ('Listening on port 8888')
@@ -48,6 +44,7 @@ def main(args):
 					res = '0'
 		except Exception as e:
 			res = "error {0}".format(repr(e))
+			raise e
 
 		if res != None:
 			s.sendto(res.encode(), addr)
