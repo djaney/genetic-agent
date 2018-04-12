@@ -1,11 +1,18 @@
-import random
+import socket
 import numpy as np
-import tensorflow as tf
-import numpy
-from keras.models import Sequential, Model
-from keras.layers import Dense, Input
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.connect(('', 8888))
 
-a = Input(shape=(2,))
-b = Dense(2)(a)
-model = Model(inputs=a, outputs=b)
-print(model.to_yaml())
+for _ in range(1000):
+    scores = []
+    for i in range(10):
+        inp = 1
+        s.send('act {} {}'.format(i, inp).encode())
+        res = s.recv(1024)
+        res = abs(float(res.decode('utf-8')))
+        score = res - inp+1
+        s.send('rec {} {}'.format(i, score).encode())
+        scores.append(score)
+    print(np.mean(scores))
+
+
