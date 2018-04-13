@@ -9,13 +9,15 @@ while True:
         inp = 1
         s.send('act {} {}'.format(i, inp).encode())
         res = s.recv(1024)
-        res = abs(float(res.decode('utf-8')))
-        score = 10 - res - inp+1
+        res = float(res.decode('utf-8'))
+
+        score = 10 - abs(res - (inp+1))
         s.send('rec {} {}'.format(i, score).encode())
         scores.append(score)
-    print(np.mean(scores))
-    if np.mean(scores) == 10:
+    print(np.max(scores))
+    if np.max(scores) > 9.9:
         break
 
-for i in range(100):
-    print(i, s.send('act 0 {}'.format(i).encode()))
+print('TEST')
+s.send('act 0 1'.encode())
+print(1, s.recv(1024))
