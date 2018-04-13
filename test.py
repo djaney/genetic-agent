@@ -16,3 +16,6 @@ while True:
     print(np.mean(scores))
     if np.mean(scores) == 10:
         break
+
+for i in range(100):
+    print(i, s.send('act 0 {}'.format(i).encode()))
