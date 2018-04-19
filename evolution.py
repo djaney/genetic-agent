@@ -1,9 +1,5 @@
 import random
 import numpy as np
-import tensorflow as tf
-import numpy
-from keras.models import Model, model_from_yaml
-from keras.layers import Input, Dense
 from operator import mul
 from functools import reduce
 class Species(object):
