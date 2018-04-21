@@ -56,7 +56,7 @@ class Species(object):
             self.next_gen.append((reward, self.strains[strain_index], strain_index))
 
     def create_model(self):
-        if None == self.model_factory:
+        if self.model_factory is None:
             raise Exception('No model factory')
         factory = __import__(self.model_factory, globals(), locals(), ['create'])
         return factory.create()
@@ -98,8 +98,8 @@ class Species(object):
 
                 # a chance to mutate
                 if random.random() < self.mutation_chance:
-                    mIdx = random.randrange(0, len(new_strain))
-                    new_strain[mIdx] = random.uniform(-1, 1) + 0.000001
+                    m_idx = random.randrange(0, len(new_strain))
+                    new_strain[m_idx] = random.uniform(-1, 1) + 0.000001
             # reshape the strain
             new_strain = restore_strain(new_strain, shapes)
             self.strains.append(new_strain)
