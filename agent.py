@@ -6,16 +6,19 @@ import socket
 parser = argparse.ArgumentParser(description='Genetic algorithm agent')
 parser.add_argument('model_factory', help='import path of model factory')
 parser.add_argument('--species', default=1)
+parser.add_argument('--port', default=8888)
 
 
 def main(args):
 
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.bind(('', 8888))
-    print('Listening on port 8888')
+    s.bind(('', args.port))
+
     agents = []
     for _ in range(args.species):
         agents.append(Species(model_factory=args.model_factory))
+
+    print('Listening on port {}'.format(args.port))
 
     while True:
         raw, addr = s.recvfrom(1024)
