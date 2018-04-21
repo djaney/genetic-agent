@@ -4,15 +4,18 @@ import argparse
 import socket
 
 parser = argparse.ArgumentParser(description='Genetic algorithm agent')
-parser.add_argument('model_factory',
-                    help='import path of model factory')
+parser.add_argument('model_factory', help='import path of model factory')
+parser.add_argument('--species', default=1)
 
 
 def main(args):
-    agent = Species(model_factory=args.model_factory)
+
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind(('', 8888))
     print('Listening on port 8888')
+    agents = []
+    for _ in range(args.species):
+        agents.append(Species(model_factory=args.model_factory))
 
     while True:
         try:
@@ -20,9 +23,11 @@ def main(args):
             raw, addr = s.recvfrom(1024)
             data = raw.decode("utf-8").split(' ')
             cmd = data[0]
-            idx = int(data[1])
-            inp = data[2]
+            species_idx = int(data[1])
+            idx = int(data[2])
+            inp = data[3]
             res = None
+            agent = agents[species_idx]
 
             if 'act' == cmd:
                 inp = inp.split(',')
