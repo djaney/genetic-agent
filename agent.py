@@ -18,9 +18,9 @@ def main(args):
         agents.append(Species(model_factory=args.model_factory))
 
     while True:
+        raw, addr = s.recvfrom(1024)
         try:
             # 1024 is the read buffer. larget than that we need to have multiple batch
-            raw, addr = s.recvfrom(1024)
             data = raw.decode("utf-8").split(' ')
             cmd = data[0]
             species_idx = int(data[1])
@@ -48,9 +48,8 @@ def main(args):
                     res = '0'
         except Exception as e:
             res = "error {0}".format(repr(e))
-            raise e
 
-        if res != None:
+        if res is not None:
             s.sendto(res.encode(), addr)
 
 
