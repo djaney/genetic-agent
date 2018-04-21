@@ -2,13 +2,33 @@ import random
 import numpy as np
 from operator import mul
 from functools import reduce
+
+
+def restore_strain(strain, shapes):
+    new_strain = []
+    start = 0
+    for i, s in enumerate(shapes):
+        end = start + reduce(mul, s)
+        new_strain.append(np.array(strain[start:end]).reshape(shapes[i]))
+        start = end
+    return new_strain
+
+
+def flatten_strain(strain):
+    new_strain = []
+    for l in strain:
+        new_strain = new_strain + l.ravel().tolist()
+    return new_strain
+
+
 class Species(object):
     """
     Genetic evolution agent
 
 
     """
-    def __init__(self, strain_count = 10, mutation_chance=0.001, model_factory=None):
+
+    def __init__(self, strain_count=10, mutation_chance=0.001, model_factory=None):
         self.strains = []
         self.next_gen = []
         self.strain_count = strain_count
@@ -33,7 +53,7 @@ class Species(object):
     def record(self, reward, strain_index):
         hit = len([s for s in self.next_gen if s[2] == strain_index])
         if 0 == hit:
-            self.next_gen.append((reward,self.strains[strain_index], strain_index))
+            self.next_gen.append((reward, self.strains[strain_index], strain_index))
 
     def create_model(self):
         if None == self.model_factory:
@@ -61,20 +81,17 @@ class Species(object):
         self.strains = []
         self.next_gen = []
 
-
         # add the best strain back into the pool
         self.strains.append(father)
 
-    
+        # convert to full numpy and get shape
+        father = flatten_strain(father)
+        mother = flatten_strain(mother)
 
-        #convert to full numpy and get shape
-        father = self.flatten_strain(father)
-        mother = self.flatten_strain(mother)
-        
         while len(self.strains) < self.strain_count:
             new_strain = []
             for i in range(len(father)):
-                if 0 == random.randrange(0,1):
+                if 0 == random.randrange(0, 1):
                     new_strain.append(father[i])
                 else:
                     new_strain.append(mother[i])
@@ -82,24 +99,7 @@ class Species(object):
                 # a chance to mutate
                 if random.random() < self.mutation_chance:
                     mIdx = random.randrange(0, len(new_strain))
-                    new_strain[mIdx] = random.uniform(-1, 1)+0.000001
+                    new_strain[mIdx] = random.uniform(-1, 1) + 0.000001
             # reshape the strain
-            new_strain = self.restore_strain(new_strain, shapes)
+            new_strain = restore_strain(new_strain, shapes)
             self.strains.append(new_strain)
-
-
-
-    def flatten_strain(self, strain):
-        new_strain = []
-        for l in strain:
-            new_strain = new_strain + l.ravel().tolist()
-        return new_strain
-
-    def restore_strain(self, strain, shapes):
-        new_strain = []
-        start = 0
-        for i, s in enumerate(shapes):
-            end = start + reduce(mul, s)
-            new_strain.append(np.array(strain[start:end]).reshape(shapes[i]))
-            start = end
-        return new_strain
