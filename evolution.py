@@ -130,6 +130,9 @@ class Species(object):
         new_strain = restore_strain(new_strain, shapes)
         self.strains.append(new_strain)
 
+    """
+    get shapes of the model layers
+    """
     def get_model_shapes(self, sample):
         if self.shapes is None:
             self.shapes = [l.shape for l in sample]
