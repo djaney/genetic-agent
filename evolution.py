@@ -83,7 +83,7 @@ class Species(object):
         self.strains.append(best_strain)
 
         for (father, mother) in parents:
-            self.breed(father, mother)
+            self.strains.append(self.breed(father, mother))
 
         # reset next gen
         self.next_gen = []
@@ -91,6 +91,7 @@ class Species(object):
     """
     Choose parents
     """
+
     def pooling(self, pair_count):
 
         pool_size = 100
@@ -138,8 +139,10 @@ class Species(object):
         father = flatten_strain(father)
         mother = flatten_strain(mother)
         new_strain = []
-        for i in range(len(father)):
-            if 0 == random.randrange(0, 1):
+        strain_length = len(father)
+        splice_point = random.randrange(0, strain_length)
+        for i in range(strain_length):
+            if i < splice_point:
                 new_strain.append(father[i])
             else:
                 new_strain.append(mother[i])
@@ -149,12 +152,12 @@ class Species(object):
                 m_idx = random.randrange(0, len(new_strain))
                 new_strain[m_idx] = random.uniform(-1, 1) + 0.000001
         # reshape the strain
-        new_strain = restore_strain(new_strain, shapes)
-        self.strains.append(new_strain)
+        return restore_strain(new_strain, shapes)
 
     """
     get shapes of the model layers
     """
+
     def get_model_shapes(self, sample):
         if self.shapes is None:
             self.shapes = [l.shape for l in sample]
