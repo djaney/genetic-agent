@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import math
 from operator import mul
 from functools import reduce
 
@@ -89,19 +90,40 @@ class Species(object):
 
     """
     Choose parents
-    Just choose the first 
     """
     def pooling(self, pair_count):
+
+        pool_size = 100
+
         # sort by fittest
         self.next_gen = sorted(self.next_gen, key=lambda item: item[0], reverse=True)
+
         # record best score
         best_score = self.next_gen[0][0]
         best_strain = self.next_gen[0][1]
+        total_score = math.ceil(reduce(lambda s, item: s + item[0], self.next_gen, 0))
 
+        strain_pool_idx = []
+        for idx, obj in enumerate(self.next_gen):
+            score, strain, strain_index = obj
+            multiplier = int(math.ceil((score / total_score) * pool_size))
+            for _ in range(multiplier):
+                strain_pool_idx.append(idx)
+
+        random.shuffle(strain_pool_idx)
         parents = []
         for _ in range(pair_count):
-            father = self.next_gen[0][1]
-            mother = self.next_gen[1][1]
+            father_index = strain_pool_idx.pop()
+            # count the same as father
+            count = strain_pool_idx.count(father_index)
+            # remove the same as father
+            strain_pool_idx = list(filter(lambda a: a != father_index, strain_pool_idx))
+            mother_index = strain_pool_idx.pop()
+            # put them back
+            strain_pool_idx = strain_pool_idx + [father_index for _ in range(count)]
+            random.shuffle(strain_pool_idx)
+            father = self.next_gen[father_index][1]
+            mother = self.next_gen[mother_index][1]
             parents.append((father, mother))
 
         return best_score, best_strain, parents
