@@ -29,6 +29,7 @@ class Species(object):
     """
 
     def __init__(self, strain_count=10, mutation_chance=0.001, model_factory=None):
+        self.shapes = None
         self.strains = []
         self.next_gen = []
         self.strain_count = strain_count
@@ -69,37 +70,67 @@ class Species(object):
 
     def evolve(self):
 
-        # find fittest
-        self.next_gen = sorted(self.next_gen, key=lambda item: item[0], reverse=True)
-        # breed
-        father = self.next_gen[0][1]
-        mother = self.next_gen[1][1]
-        self.best = self.next_gen[0][0]
-
-        # get the shape of each layer
-        shapes = [l.shape for l in father]
         self.strains = []
+
+        # strain count -1 due to adding best score as part of the generation
+        best_score, best_strain, parents = self.pooling(self.strain_count - 1)
+
+        # record best score
+        self.best = best_score
+
+        # add the best strain back
+        self.strains.append(best_strain)
+
+        for (father, mother) in parents:
+            self.breed(father, mother)
+
+        # reset next gen
         self.next_gen = []
 
-        # add the best strain back into the pool
-        self.strains.append(father)
+    """
+    Choose parents
+    Just choose the first 
+    """
+    def pooling(self, pair_count):
+        # sort by fittest
+        self.next_gen = sorted(self.next_gen, key=lambda item: item[0], reverse=True)
+        # record best score
+        best_score = self.next_gen[0][0]
+        best_strain = self.next_gen[0][1]
 
-        # convert to full numpy and get shape
+        parents = []
+        for _ in range(pair_count):
+            father = self.next_gen[0][1]
+            mother = self.next_gen[1][1]
+            parents.append((father, mother))
+
+        return best_score, best_strain, parents
+
+    """
+    Breed 2 strands to produce one child
+    """
+
+    def breed(self, father, mother):
+        # get the shape of each layer for later restoration
+        shapes = self.get_model_shapes(father)
         father = flatten_strain(father)
         mother = flatten_strain(mother)
+        new_strain = []
+        for i in range(len(father)):
+            if 0 == random.randrange(0, 1):
+                new_strain.append(father[i])
+            else:
+                new_strain.append(mother[i])
 
-        while len(self.strains) < self.strain_count:
-            new_strain = []
-            for i in range(len(father)):
-                if 0 == random.randrange(0, 1):
-                    new_strain.append(father[i])
-                else:
-                    new_strain.append(mother[i])
+            # a chance to mutate
+            if random.random() < self.mutation_chance:
+                m_idx = random.randrange(0, len(new_strain))
+                new_strain[m_idx] = random.uniform(-1, 1) + 0.000001
+        # reshape the strain
+        new_strain = restore_strain(new_strain, shapes)
+        self.strains.append(new_strain)
 
-                # a chance to mutate
-                if random.random() < self.mutation_chance:
-                    m_idx = random.randrange(0, len(new_strain))
-                    new_strain[m_idx] = random.uniform(-1, 1) + 0.000001
-            # reshape the strain
-            new_strain = restore_strain(new_strain, shapes)
-            self.strains.append(new_strain)
+    def get_model_shapes(self, sample):
+        if self.shapes is None:
+            self.shapes = [l.shape for l in sample]
+        return self.shapes
