@@ -74,7 +74,9 @@ class Species(object):
         self.strains = []
 
         # strain count -1 due to adding best score as part of the generation
-        best_score, best_strain, parents = self.pooling(self.strain_count)
+        best_score, best_strain, parents = self.pooling(self.strain_count-1)
+
+        self.strains.append(best_strain)
 
         # record best score
         self.best = best_score
@@ -93,10 +95,11 @@ class Species(object):
 
     def pooling(self, pair_count):
 
-        pool_size = 100
+        pool_size = pair_count * 5
 
         # sort by fittest
         self.next_gen = sorted(self.next_gen, key=lambda item: item[0], reverse=True)
+
         # record best score
         best_score = self.next_gen[0][0]
         best_strain = self.next_gen[0][1]
@@ -113,14 +116,18 @@ class Species(object):
         parents = []
         for _ in range(pair_count):
             father_index = strain_pool_idx.pop()
+
             # count the same as father
             count = strain_pool_idx.count(father_index)
+
             # remove the same as father
             strain_pool_idx = list(filter(lambda a: a != father_index, strain_pool_idx))
             mother_index = strain_pool_idx.pop()
+
             # put them back
             strain_pool_idx = strain_pool_idx + [father_index for _ in range(count)]
             random.shuffle(strain_pool_idx)
+
             father = self.next_gen[father_index][1]
             mother = self.next_gen[mother_index][1]
             parents.append((father, mother))
@@ -134,16 +141,24 @@ class Species(object):
     def breed(self, father, mother):
         # get the shape of each layer for later restoration
         shapes = self.get_model_shapes(father)
+
         father = flatten_strain(father)
         mother = flatten_strain(mother)
+
+        # chance to switch
+        if random.random() > 0.5:
+            tmp = father
+            father = mother
+            mother = tmp
+
         strain_length = len(father)
-        splice_point = random.randrange(0, strain_length)
+        splice_point = random.randrange(1, strain_length-1)
         new_strain = father[:splice_point] + mother[splice_point:]
 
         # a chance to mutate
-        if random.random() < self.mutation_chance:
-            m_idx = random.randrange(0, len(new_strain))
-            new_strain[m_idx] = new_strain[m_idx] + random.uniform(-0.05, 0.05)
+        for m_idx in range(len(new_strain)):
+            if random.random() < self.mutation_chance:
+                new_strain[m_idx] = random.uniform(-1, 1)
 
         # reshape the strain
         return restore_strain(new_strain, shapes)

@@ -6,7 +6,7 @@ import socket
 parser = argparse.ArgumentParser(description='Genetic algorithm agent')
 parser.add_argument('model_factory', help='import path of model factory')
 parser.add_argument('--species', default=1)
-parser.add_argument('--population', default=10)
+parser.add_argument('--population', default=100)
 parser.add_argument('--port', default=8888)
 
 
@@ -41,10 +41,10 @@ def main(args):
         elif 'rec' == cmd:
             inp = float(inp)
             agent.record(inp, idx)
-            print('rec {} score {}, {} remaining'.format(idx, inp, len(agent.strains) - len(agent.next_gen)))
+            print('rec {} score {}'.format(idx, inp))
             if agent.is_ready_to_evolve():
                 agent.evolve()
-                print('evolve')
+                print('evolve {}'.format(agent.get_best_reward()))
                 res = '1'
             else:
                 res = '0'
