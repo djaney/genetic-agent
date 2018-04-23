@@ -95,7 +95,7 @@ class Species(object):
 
     def pooling(self, pair_count):
 
-        pool_size = pair_count * 5
+        pool_size = pair_count * 2
 
         # sort by fittest
         self.next_gen = sorted(self.next_gen, key=lambda item: item[0], reverse=True)
@@ -115,14 +115,14 @@ class Species(object):
         random.shuffle(strain_pool_idx)
         parents = []
         for _ in range(pair_count):
-            father_index = strain_pool_idx.pop()
+            father_index = strain_pool_idx[0]
 
             # count the same as father
             count = strain_pool_idx.count(father_index)
 
             # remove the same as father
             strain_pool_idx = list(filter(lambda a: a != father_index, strain_pool_idx))
-            mother_index = strain_pool_idx.pop()
+            mother_index = strain_pool_idx[0]
 
             # put them back
             strain_pool_idx = strain_pool_idx + [father_index for _ in range(count)]
@@ -130,6 +130,7 @@ class Species(object):
 
             father = self.next_gen[father_index][1]
             mother = self.next_gen[mother_index][1]
+
             parents.append((father, mother))
 
         return best_score, best_strain, parents
