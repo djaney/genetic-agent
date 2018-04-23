@@ -29,7 +29,7 @@ class Species(object):
 
     """
 
-    def __init__(self, strain_count=10, mutation_chance=0.001, model_factory=None):
+    def __init__(self, strain_count=10, mutation_chance=0.01, model_factory=None):
         self.shapes = None
         self.strains = []
         self.next_gen = []
@@ -74,14 +74,13 @@ class Species(object):
         self.strains = []
 
         # strain count -1 due to adding best score as part of the generation
-        best_score, best_strain, parents = self.pooling(self.strain_count - 1)
+        best_score, best_strain, parents = self.pooling(self.strain_count)
 
         # record best score
         self.best = best_score
 
         # add the best strain back
-        self.strains.append(best_strain)
-
+        # self.strains.append(best_strain)
         for (father, mother) in parents:
             self.strains.append(self.breed(father, mother))
 
@@ -98,7 +97,6 @@ class Species(object):
 
         # sort by fittest
         self.next_gen = sorted(self.next_gen, key=lambda item: item[0], reverse=True)
-
         # record best score
         best_score = self.next_gen[0][0]
         best_strain = self.next_gen[0][1]
@@ -138,19 +136,15 @@ class Species(object):
         shapes = self.get_model_shapes(father)
         father = flatten_strain(father)
         mother = flatten_strain(mother)
-        new_strain = []
         strain_length = len(father)
         splice_point = random.randrange(0, strain_length)
-        for i in range(strain_length):
-            if i < splice_point:
-                new_strain.append(father[i])
-            else:
-                new_strain.append(mother[i])
+        new_strain = father[:splice_point] + mother[splice_point:]
 
-            # a chance to mutate
-            if random.random() < self.mutation_chance:
-                m_idx = random.randrange(0, len(new_strain))
-                new_strain[m_idx] = random.uniform(-0.05, 0.5)
+        # a chance to mutate
+        if random.random() < self.mutation_chance:
+            m_idx = random.randrange(0, len(new_strain))
+            new_strain[m_idx] = new_strain[m_idx] + random.uniform(-0.05, 0.05)
+
         # reshape the strain
         return restore_strain(new_strain, shapes)
 

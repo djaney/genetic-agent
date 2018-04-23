@@ -1,7 +1,8 @@
-from keras.models import Sequential, Model
-from keras.layers import Dense, Input
+from keras.models import Sequential
+from keras.layers import Dense
+
 
 def create():
-    a = Input(shape=(4,))
-    b = Dense(2)(a)
-    return Model(inputs=a, outputs=b)
+    model = Sequential()
+    model.add(Dense(2, input_shape=[4], activation='relu'))
+    return model
