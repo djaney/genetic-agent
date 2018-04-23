@@ -6,7 +6,7 @@ import socket
 parser = argparse.ArgumentParser(description='Genetic algorithm agent')
 parser.add_argument('model_factory', help='import path of model factory')
 parser.add_argument('--species', default=1)
-parser.add_argument('--population', default=100)
+parser.add_argument('--population', default=10)
 parser.add_argument('--port', default=8888)
 
 
