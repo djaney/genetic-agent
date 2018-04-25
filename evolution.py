@@ -89,6 +89,8 @@ class Species(object):
         # add the best strain back
         # self.strains.append(best_strain)
         for (father, mother) in parents:
+            father = self.mutate(father)
+            mother = self.mutate(mother)
             self.strains.append(self.breed(father, mother))
 
         # reset next gen
@@ -141,6 +143,16 @@ class Species(object):
 
         return best_score, best_strain, parents
 
+    def mutate(self, model):
+        strain = flatten_strain(model.get_weights())
+        shapes = self.get_model_shapes(model.get_weights())
+        # a chance to mutate
+        for m_idx in range(len(strain)):
+            if random.random() < self.mutation_chance:
+                strain[m_idx] = strain[m_idx] + random.uniform(-0.5, 0.5)
+        model.set_weights(restore_strain(strain, shapes))
+        return model
+
     """
     Breed 2 strands to produce one child
     """
@@ -162,11 +174,6 @@ class Species(object):
         strain_length = len(father)
         splice_point = random.randrange(1, strain_length - 1)
         new_strain = father[:splice_point] + mother[splice_point:]
-
-        # a chance to mutate
-        for m_idx in range(len(new_strain)):
-            if random.random() < self.mutation_chance:
-                new_strain[m_idx] = new_strain[m_idx] + random.uniform(-0.5, 0.5)
 
         # reshape the strain
         model.set_weights(restore_strain(new_strain, shapes))
