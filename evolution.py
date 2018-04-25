@@ -42,13 +42,13 @@ class Species(object):
         self.best = 0
 
         for _ in range(self.strain_count):
-            self.strains.append(self.create_model().get_weights())
+            self.strains.append(self.create_model())
 
     def generation_size(self):
         return len(self.strains)
 
     def act(self, observation, strain_index):
-        self.model.set_weights(self.strains[strain_index])
+        self.model = self.strains[strain_index]
         y = self.model.predict(np.array([observation]), batch_size=1)
         return y[0]
 
@@ -133,7 +133,6 @@ class Species(object):
 
             father = self.next_gen[father_index][1]
             mother = self.next_gen[mother_index][1]
-
             parents.append((father, mother))
 
         return best_score, best_strain, parents
@@ -143,11 +142,12 @@ class Species(object):
     """
 
     def breed(self, father, mother):
+        model = father
         # get the shape of each layer for later restoration
-        shapes = self.get_model_shapes(father)
+        shapes = self.get_model_shapes(father.get_weights())
 
-        father = flatten_strain(father)
-        mother = flatten_strain(mother)
+        father = flatten_strain(father.get_weights())
+        mother = flatten_strain(mother.get_weights())
 
         # chance to switch
         if random.random() > 0.5:
@@ -165,7 +165,8 @@ class Species(object):
                 new_strain[m_idx] = new_strain[m_idx] + random.uniform(-0.5, 0.5)
 
         # reshape the strain
-        return restore_strain(new_strain, shapes)
+        model.set_weights(restore_strain(new_strain, shapes))
+        return model
 
     """
     get shapes of the model layers
