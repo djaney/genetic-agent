@@ -3,6 +3,8 @@ import numpy as np
 import math
 from operator import mul
 from functools import reduce
+from keras.models import Sequential
+from keras.layers import Dense
 
 
 def restore_strain(strain, shapes):
@@ -29,14 +31,15 @@ class Species(object):
 
     """
 
-    def __init__(self, strain_count=10, mutation_chance=0.01, model_factory=None):
+    def __init__(self, input_count, output_count, hidden, depth, strain_count=10, mutation_chance=0.01):
+        self.input = input_count
+        self.output = output_count
+        self.hidden = hidden
+        self.depth = depth
         self.shapes = None
         self.strains = []
         self.next_gen = []
         self.strain_count = strain_count
-
-        self.model_factory = model_factory
-
         self.model = self.create_model()
         self.mutation_chance = mutation_chance
         self.best = 0
@@ -58,10 +61,12 @@ class Species(object):
             self.next_gen.append((reward, self.strains[strain_index], strain_index))
 
     def create_model(self):
-        if self.model_factory is None:
-            raise Exception('No model factory')
-        factory = __import__(self.model_factory, globals(), locals(), ['create'])
-        return factory.create()
+        model = Sequential()
+        model.add(Dense(self.hidden, input_shape=[self.input], activation='sigmoid'))
+        for _ in range(self.depth):
+            model.add(Dense(self.hidden, activation='sigmoid'))
+        model.add(Dense(self.output, activation='sigmoid'))
+        return model
 
     def get_best_reward(self):
         return self.best
@@ -111,7 +116,7 @@ class Species(object):
             if virtual_score <= 0:
                 break
 
-            multiplier = math.floor(virtual_score) ** 2
+            multiplier = int(math.floor(virtual_score) ** 2)
             for _ in range(multiplier):
                 strain_pool_idx.append(idx)
 

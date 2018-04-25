@@ -4,7 +4,10 @@ import argparse
 import socket
 
 parser = argparse.ArgumentParser(description='Genetic algorithm agent')
-parser.add_argument('model_factory', help='import path of model factory')
+parser.add_argument('input', type=int)
+parser.add_argument('output', type=int)
+parser.add_argument('hidden', type=int)
+parser.add_argument('depth', type=int)
 parser.add_argument('--species', default=1)
 parser.add_argument('--population', default=10)
 parser.add_argument('--port', default=8888)
@@ -16,7 +19,7 @@ def main(args):
 
     agents = []
     for _ in range(args.species):
-        agents.append(Species(model_factory=args.model_factory, strain_count=args.population))
+        agents.append(Species(args.input, args.output, args.hidden, args.depth, strain_count=args.population))
 
     print('Listening on port {}'.format(args.port))
 
