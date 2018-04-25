@@ -95,7 +95,6 @@ class Species(object):
 
     def pooling(self, pair_count):
 
-        pool_size = pair_count * 2
 
         # sort by fittest
         self.next_gen = sorted(self.next_gen, key=lambda item: item[0], reverse=True)
@@ -107,8 +106,12 @@ class Species(object):
 
         strain_pool_idx = []
         for idx, obj in enumerate(self.next_gen):
-            score, strain, strain_index = obj
-            multiplier = int(math.ceil((score / total_score) * pool_size))
+            # consider only the top half rank
+            virtual_score = (self.strain_count/2) - idx
+            if virtual_score <= 0:
+                break
+
+            multiplier = math.floor(virtual_score) ** 2
             for _ in range(multiplier):
                 strain_pool_idx.append(idx)
 
