@@ -162,7 +162,7 @@ class Species(object):
         # a chance to mutate
         for m_idx in range(len(new_strain)):
             if random.random() < self.mutation_chance:
-                new_strain[m_idx] = random.uniform(-1, 1)
+                new_strain[m_idx] = new_strain[m_idx] + random.uniform(-0.5, 0.5)
 
         # reshape the strain
         return restore_strain(new_strain, shapes)
