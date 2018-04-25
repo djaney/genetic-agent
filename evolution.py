@@ -79,7 +79,7 @@ class Species(object):
         self.strains = []
 
         # strain count -1 due to adding best score as part of the generation
-        best_score, best_strain, parents = self.pooling(self.strain_count-1)
+        best_score, best_strain, parents = self.pooling(self.strain_count - 1)
 
         self.strains.append(best_strain)
 
@@ -100,7 +100,6 @@ class Species(object):
 
     def pooling(self, pair_count):
 
-
         # sort by fittest
         self.next_gen = sorted(self.next_gen, key=lambda item: item[0], reverse=True)
 
@@ -112,7 +111,7 @@ class Species(object):
         strain_pool_idx = []
         for idx, obj in enumerate(self.next_gen):
             # consider only the top half rank
-            virtual_score = (self.strain_count/2) - idx
+            virtual_score = (self.strain_count / 2) - idx
             if virtual_score <= 0:
                 break
 
@@ -161,7 +160,7 @@ class Species(object):
             mother = tmp
 
         strain_length = len(father)
-        splice_point = random.randrange(1, strain_length-1)
+        splice_point = random.randrange(1, strain_length - 1)
         new_strain = father[:splice_point] + mother[splice_point:]
 
         # a chance to mutate
