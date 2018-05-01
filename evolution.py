@@ -62,10 +62,10 @@ class Species(object):
 
     def create_model(self):
         model = Sequential()
-        model.add(Dense(self.hidden, input_shape=[self.input], activation='sigmoid'))
+        model.add(Dense(self.hidden, input_shape=[self.input], activation='linear'))
         for _ in range(self.depth):
-            model.add(Dense(self.hidden, activation='sigmoid'))
-        model.add(Dense(self.output, activation='sigmoid'))
+            model.add(Dense(self.hidden, activation='linear'))
+        model.add(Dense(self.output, activation='linear'))
         return model
 
     def get_best_reward(self):
@@ -75,7 +75,6 @@ class Species(object):
         return len(self.strains) == len(self.next_gen)
 
     def evolve(self):
-
         self.strains = []
 
         # strain count -1 due to adding best score as part of the generation
@@ -104,11 +103,15 @@ class Species(object):
 
         # sort by fittest
         self.next_gen = sorted(self.next_gen, key=lambda item: item[0], reverse=True)
+        test = []
+        for _ in self.next_gen:
+            test.append(_[0])
+        print(test)
+
 
         # record best score
         best_score = self.next_gen[0][0]
         best_strain = self.next_gen[0][1]
-        total_score = math.ceil(reduce(lambda s, item: s + item[0], self.next_gen, 0))
 
         strain_pool_idx = []
         for idx, obj in enumerate(self.next_gen):

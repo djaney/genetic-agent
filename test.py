@@ -24,11 +24,14 @@ while True:
         ob = env.reset()
         while True:
             action = agent.act(ob, i)
-            action = np.argmax(action)
-            ob, reward, done, info = env.step(action)
+            ob, reward, done, info = env.step(np.argmax(action))
             reward_sum = reward_sum + reward
             scores.append(reward_sum)
+            # env.render()
             if done:
                 break
         agent.record(reward_sum, i)
         print('max score {}'.format(np.max(scores)))
+
+    agent.evolve()
+    print('evolve')
