@@ -1,23 +1,34 @@
-import socket
+import gym
+
 import numpy as np
-s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-s.connect(('', 8888))
+from evolution import Species
 
+
+env = gym.make('CartPole-v0')
+
+done = False
+generationSize = 10
+iterations = 100
+
+agent = Species(input_count=4, output_count=2, hidden=1, depth=1)
+
+
+# learn
+gen = 0
 while True:
+
     scores = []
+    max_score = 0
     for i in range(10):
-        inp = 1
-        s.send('act 0 {} {}'.format(i, inp).encode())
-        res = s.recv(1024)
-        res = float(res.decode('utf-8'))
-
-        score = 10 - abs(res - (inp+1))
-        s.send('rec 0 {} {}'.format(i, score).encode())
-        scores.append(score)
-    print(np.max(scores))
-    if np.max(scores) > 9.9:
-        break
-
-print('TEST')
-s.send('act 0 0 1'.encode())
-print(1, s.recv(1024))
+        reward_sum = 0
+        ob = env.reset()
+        while True:
+            action = agent.act(ob, i)
+            action = np.argmax(action)
+            ob, reward, done, info = env.step(action)
+            reward_sum = reward_sum + reward
+            scores.append(reward_sum)
+            if done:
+                break
+        agent.record(reward_sum, i)
+        print('max score {}'.format(np.max(scores)))
