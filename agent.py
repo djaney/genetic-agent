@@ -1,7 +1,10 @@
 #!/usr/bin/python3
 from evolution import Species
 import argparse
-import socket
+
+import tornado.ioloop
+import tornado.web
+import json
 
 parser = argparse.ArgumentParser(description='Genetic algorithm agent')
 parser.add_argument('input', type=int)
@@ -12,48 +15,50 @@ parser.add_argument('--species', default=1)
 parser.add_argument('--population', default=10)
 parser.add_argument('--port', default=8888)
 
+agents = []
+
+
+class ActHandler(tornado.web.RequestHandler):
+
+    def data_received(self, chunk):
+        pass
+
+    def post(self):
+        data = json.loads(self.request.body.decode('utf-8'))
+        res = []
+        for d in data:
+            action = agents[d[0]].act(d[2], d[1])
+            res.append([d[0], d[1], action])
+        self.write(json.dumps(res))
+
+
+class RecHandler(tornado.web.RequestHandler):
+    def data_received(self, chunk):
+        pass
+
+    def post(self):
+        print(self.request.body)
+
+        # data = json.loads(self.request.body.encode('utf-8'))
+        self.write("Hello, world")
+
+
+def make_app():
+    return tornado.web.Application([
+        (r"/act", ActHandler),
+        (r"/rec", RecHandler),
+    ])
+
 
 def main(args):
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.bind(('', args.port))
-
-    agents = []
     for _ in range(args.species):
         agents.append(Species(args.input, args.output, args.hidden, args.depth, strain_count=args.population))
 
-    print('Listening on port {}'.format(args.port))
+    print('listening {}'.format(args.port))
+    app = make_app()
+    app.listen(args.port)
+    tornado.ioloop.IOLoop.current().start()
 
-    while True:
-        raw, addr = s.recvfrom(1024)
-        # 1024 is the read buffer. larget than that we need to have multiple batch
-        data = raw.decode("utf-8").split(' ')
-        cmd = data[0]
-        species_idx = int(data[1])
-        idx = int(data[2])
-        inp = data[3]
-        res = None
-        agent = agents[species_idx]
-
-        if 'act' == cmd:
-            inp = inp.split(',')
-            inp = [float(i) for i in inp]
-            res = agent.act(inp, idx)
-            res = res.tolist()
-            res = [str(i) for i in res]
-            res = ','.join(res)
-        elif 'rec' == cmd:
-            inp = float(inp)
-            agent.record(inp, idx)
-            print('rec {} score {}'.format(idx, inp))
-            if agent.is_ready_to_evolve():
-                agent.evolve()
-                print('evolve {}'.format(agent.get_best_reward()))
-                res = '1'
-            else:
-                res = '0'
-
-        if res is not None:
-            s.sendto(res.encode(), addr)
 
 
 main(parser.parse_args())
