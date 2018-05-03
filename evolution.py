@@ -31,7 +31,7 @@ class Species(object):
 
     """
 
-    def __init__(self, input_count, output_count, hidden, depth, strain_count=10, mutation_chance=0.01):
+    def __init__(self, input_count, output_count, hidden, depth, strain_count=10, mutation_chance=0.01, carry_over=0.2):
         self.input = input_count
         self.output = output_count
         self.hidden = hidden
@@ -43,6 +43,7 @@ class Species(object):
         self.model = self.create_model()
         self.mutation_chance = mutation_chance
         self.best = 0
+        self.carry_over = carry_over
 
         for _ in range(self.strain_count):
             self.strains.append(self.create_model())
@@ -77,10 +78,15 @@ class Species(object):
     def evolve(self):
         self.strains = []
 
-        # strain count -1 due to adding best score as part of the generation
-        best_score, best_strain, parents = self.pooling(self.strain_count - 1)
+        carry_over_count = int(math.floor(self.strain_count * self.carry_over))
 
-        self.strains.append(best_strain)
+        # strain count -1 due to adding best score as part of the generation
+        best_score, best_strain, parents = self.pooling(self.strain_count - carry_over_count)
+
+        # add a percentage of the top strains back
+        for i in range(carry_over_count):
+            self.strains.append(self.next_gen[i][1])
+            print('top scorer', self.next_gen[i][0])
 
         # record best score
         self.best = best_score
@@ -103,11 +109,6 @@ class Species(object):
 
         # sort by fittest
         self.next_gen = sorted(self.next_gen, key=lambda item: item[0], reverse=True)
-        test = []
-        for _ in self.next_gen:
-            test.append(_[0])
-        print(test)
-
 
         # record best score
         best_score = self.next_gen[0][0]
@@ -152,7 +153,7 @@ class Species(object):
         # a chance to mutate
         for m_idx in range(len(strain)):
             if random.random() < self.mutation_chance:
-                strain[m_idx] = strain[m_idx] + random.uniform(-0.5, 0.5)
+                strain[m_idx] = strain[m_idx] * random.uniform(-2, 2)
         model.set_weights(restore_strain(strain, shapes))
         return model
 

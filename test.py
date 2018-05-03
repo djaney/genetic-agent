@@ -4,7 +4,7 @@ import numpy as np
 from evolution import Species
 
 
-env = gym.make('CartPole-v0')
+env = gym.make('CartPole-v1')
 
 done = False
 generationSize = 10
