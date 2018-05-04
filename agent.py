@@ -33,8 +33,23 @@ class AgentHandler(tornado.web.RequestHandler):
 class ActHandler(AgentHandler):
     def post(self):
         data = get_json_body(self)
+        if type(data) is not list:
+            raise Exception("format must be[[agent_index, strain_index, [observations...]...]")
+
         res = []
         for d in data:
+            if type(d) is not list:
+                raise Exception("format must be [[agent_index, strain_index, [observations...]...]")
+
+            if type(d[0]) is not int:
+                raise Exception("format must be [[agent_index, strain_index, [observations...]...]")
+
+            if type(d[1]) is not int:
+                raise Exception("format must be [[agent_index, strain_index, [observations...]...]")
+
+            if type(d[2]) is not int:
+                raise Exception("format must be [[agent_index, strain_index, [observations...]...]")
+
             action = agents[d[0]].act(d[2], d[1])
             res.append([d[0], d[1], action.tolist()])
         json_string = json.dumps(res)
