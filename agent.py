@@ -18,29 +18,44 @@ parser.add_argument('--port', default=8888)
 agents = []
 
 
-class ActHandler(tornado.web.RequestHandler):
+def get_json_body(handler):
+    return json.loads(handler.request.body.decode('utf-8'))
 
+
+class AgentHandler(tornado.web.RequestHandler):
     def data_received(self, chunk):
         pass
 
+    def set_default_headers(self):
+        self.set_header('Content-Type', 'application/json')
+
+
+class ActHandler(AgentHandler):
     def post(self):
-        data = json.loads(self.request.body.decode('utf-8'))
+        data = get_json_body(self)
         res = []
         for d in data:
             action = agents[d[0]].act(d[2], d[1])
-            res.append([d[0], d[1], action])
-        self.write(json.dumps(res))
+            res.append([d[0], d[1], action.tolist()])
+        json_string = json.dumps(res)
+
+        self.write(json_string)
 
 
-class RecHandler(tornado.web.RequestHandler):
-    def data_received(self, chunk):
-        pass
-
+class RecHandler(AgentHandler):
     def post(self):
-        print(self.request.body)
+        data = get_json_body(self)
+        res = []
+        for d in data:
+            agent = agents[d[0]]
+            agent.record(float(d[2]), d[1])
+            is_evolved = agent.is_ready_to_evolve()
+            if is_evolved:
+                agent.evolve()
+            res.append([d[0], d[1], {'evolved': is_evolved}])
+        json_string = json.dumps(res)
 
-        # data = json.loads(self.request.body.encode('utf-8'))
-        self.write("Hello, world")
+        self.write(json_string)
 
 
 def make_app():
@@ -54,11 +69,11 @@ def main(args):
     for _ in range(args.species):
         agents.append(Species(args.input, args.output, args.hidden, args.depth, strain_count=args.population))
 
+    agents[0].strains[0].summary()
     print('listening {}'.format(args.port))
     app = make_app()
     app.listen(args.port)
     tornado.ioloop.IOLoop.current().start()
-
 
 
 main(parser.parse_args())

@@ -63,10 +63,10 @@ class Species(object):
 
     def create_model(self):
         model = Sequential()
-        model.add(Dense(self.hidden, input_shape=[self.input], activation='linear'))
+        model.add(Dense(self.hidden, input_shape=[self.input]))
         for _ in range(self.depth):
-            model.add(Dense(self.hidden, activation='linear'))
-        model.add(Dense(self.output, activation='linear'))
+            model.add(Dense(self.hidden))
+        model.add(Dense(self.output))
         return model
 
     def get_best_reward(self):
@@ -86,7 +86,6 @@ class Species(object):
         # add a percentage of the top strains back
         for i in range(carry_over_count):
             self.strains.append(self.next_gen[i][1])
-            print('top scorer', self.next_gen[i][0])
 
         # record best score
         self.best = best_score
