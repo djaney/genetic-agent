@@ -44,6 +44,7 @@ class Species(object):
         self.mutation_chance = mutation_chance
         self.best = 0
         self.carry_over = carry_over
+        self.current_generation = 1
 
         for _ in range(self.strain_count):
             self.strains.append(self.create_model())
@@ -99,6 +100,7 @@ class Species(object):
 
         # reset next gen
         self.next_gen = []
+        self.current_generation = self.current_generation + 1
 
     """
     Choose parents

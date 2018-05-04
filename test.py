@@ -7,10 +7,8 @@ from evolution import Species
 env = gym.make('CartPole-v1')
 
 done = False
-generationSize = 10
-iterations = 100
 
-agent = Species(input_count=4, output_count=2, hidden=1, depth=1)
+agent = Species(input_count=4, output_count=2, hidden=1, depth=1, strain_count=100)
 
 
 # learn
@@ -19,7 +17,8 @@ while True:
 
     scores = []
     max_score = 0
-    for i in range(10):
+    print('generation {}'.format(agent.current_generation))
+    for i in range(100):
         reward_sum = 0
         ob = env.reset()
         while True:
@@ -34,4 +33,3 @@ while True:
         print('max score {}'.format(np.max(scores)))
 
     agent.evolve()
-    print('evolve')
