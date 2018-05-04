@@ -47,7 +47,7 @@ class ActHandler(AgentHandler):
             if type(d[1]) is not int:
                 raise Exception("format must be [[agent_index, strain_index, [observations...]...]")
 
-            if type(d[2]) is not int:
+            if type(d[2]) is not list:
                 raise Exception("format must be [[agent_index, strain_index, [observations...]...]")
 
             action = agents[d[0]].act(d[2], d[1])
