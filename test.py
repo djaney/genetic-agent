@@ -1,35 +1,38 @@
 import gym
-
 import numpy as np
-from evolution import Species
+from urllib import request
+import json
 
 
-env = gym.make('CartPole-v1')
+environments = []
+for _ in range(10):
+    environments.append(gym.make('CartPole-v1'))
 
-done = False
-
-agent = Species(input_count=4, output_count=2, hidden=1, depth=1, strain_count=100)
-
-
+done_list = []
+score_list = {}
 # learn
 gen = 0
 while True:
 
-    scores = []
     max_score = 0
-    print('generation {}'.format(agent.current_generation))
-    for i in range(100):
-        reward_sum = 0
+    data = []
+    reward_sum = 0
+    for i, env in enumerate(environments):
+        score_list[i] = 0
         ob = env.reset()
-        while True:
-            action = agent.act(ob, i)
-            ob, reward, done, info = env.step(np.argmax(action))
-            reward_sum = reward_sum + reward
-            scores.append(reward_sum)
-            # env.render()
-            if done:
-                break
-        agent.record(reward_sum, i)
-        print('max score {}'.format(np.max(scores)))
+        data.append([0, i, ob.tolist()])
+    data = json.dumps(data)
+    req = request.Request('http://localhost:8888/act', data=data.encode('utf-8'))
+    resp = request.urlopen(req)
+    resp_data = resp.read().decode('utf-8')
+    resp_data = json.loads(resp_data)
 
-    agent.evolve()
+    for i, env in enumerate(environments):
+        print(done_list)
+        if i in done_list:
+            continue
+        action = resp_data[i][2]
+        ob, reward, done, info = env.step(np.argmax(action))
+        score_list[i] = score_list[i] + reward
+        if done:
+            done_list.append(i)
