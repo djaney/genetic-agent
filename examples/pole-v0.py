@@ -3,11 +3,12 @@ import gym
 import numpy as np
 from evolution import Species
 
-env = gym.make('CartPole-v1')
+env = gym.make('CartPole-v0')
 
 done = False
 
 strain_count = 10
+passing_score = 100
 
 agent = Species(input_count=env.observation_space.shape[0], output_count=env.action_space.n, hidden=1, depth=1,
                 strain_count=strain_count)
@@ -33,7 +34,7 @@ while True:
         scores.append(reward_sum)
     print("generation {} max score {}".format(agent.current_generation, np.max(scores)))
 
-    if np.max(scores) >= 500:
+    if np.max(scores) >= passing_score:
         break
     else:
         agent.evolve()
