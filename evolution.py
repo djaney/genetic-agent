@@ -31,7 +31,7 @@ class Species(object):
 
     """
 
-    def __init__(self, input_count, output_count, hidden, depth, strain_count=10, mutation_chance=0.01, carry_over=0.2):
+    def __init__(self, input_count, output_count, hidden, depth, strain_count=10, mutation_chance=0.01, carry_over=0.2, save=None):
         self.input = input_count
         self.output = output_count
         self.hidden = hidden
@@ -45,6 +45,7 @@ class Species(object):
         self.best = 0
         self.carry_over = carry_over
         self.current_generation = 1
+        self.save_name = save
 
         for _ in range(self.strain_count):
             self.strains.append(self.create_model())
@@ -64,10 +65,10 @@ class Species(object):
 
     def create_model(self):
         model = Sequential()
-        model.add(Dense(self.hidden, input_shape=[self.input]))
+        model.add(Dense(self.hidden, input_shape=[self.input], activation='tanh'))
         for _ in range(self.depth):
-            model.add(Dense(self.hidden))
-        model.add(Dense(self.output))
+            model.add(Dense(self.hidden, activation='tanh'))
+        model.add(Dense(self.output, activation='tanh'))
         return model
 
     def get_best_reward(self):
