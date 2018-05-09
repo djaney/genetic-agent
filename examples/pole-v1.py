@@ -44,3 +44,6 @@ while True:
     ob, reward, done, info = env.step(np.argmax(action))
     scores.append(reward_sum)
     env.render()
+    if done:
+        ob = env.reset()
+
