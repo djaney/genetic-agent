@@ -8,7 +8,7 @@ env = gym.make('MountainCarContinuous-v0')
 done = False
 
 strain_count = 10
-passing_score = 1
+passing_score = env.reward_range[1]
 agent = Species(input_count=env.observation_space.shape[0], output_count=env.action_space.shape[0], hidden=2, depth=1,
                 strain_count=strain_count, save='mountaincar')
 
