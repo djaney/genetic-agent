@@ -9,8 +9,10 @@ done = False
 
 strain_count = 100
 generation_check = 1
-agent = Species(input_count=2, output_count=3, hidden=1, depth=1,
+agent = Species(input_count=2, output_count=3, hidden=3, depth=0,
                 strain_count=strain_count, final_activation='softmax')
+
+agent.strains[0].summary()
 
 # learn
 gen = 0
