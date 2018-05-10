@@ -32,7 +32,7 @@ class Species(object):
     """
 
     def __init__(self, input_count, output_count, hidden, depth, strain_count=10, mutation_chance=0.01, carry_over=0.2,
-                 final_activation='linear'):
+                 final_activation='softmax'):
         self.input = input_count
         self.output = output_count
         self.hidden = hidden
