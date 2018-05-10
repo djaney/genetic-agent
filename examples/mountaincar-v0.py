@@ -9,7 +9,7 @@ done = False
 
 strain_count = 10
 generation_check = 10
-agent = Species(input_count=2, output_count=3, hidden=2, depth=1,
+agent = Species(input_count=2, output_count=3, hidden=1, depth=1,
                 strain_count=strain_count, final_activation='softmax')
 
 # learn
@@ -20,18 +20,20 @@ while True:
     max_score = 0
 
     for i in range(strain_count):
-        reward_sum = 300
+        reward_sum = 200
         max_position = -1.2
+        min_position = 0.6
         ob = env.reset()
         while True:
             action = agent.act(ob, i)
             ob, reward, done, info = env.step(np.argmax(action))
-            max_position = np.max([max_position,ob[0]])
+            max_position = np.max([max_position, ob[0]])
+            min_position = np.min([min_position, ob[0]])
             reward_sum = reward_sum + reward
             # env.render()
             if done:
                 break
-        reward_sum = reward_sum + max_position
+        reward_sum = reward_sum + max_position + (abs(min_position)/2)
         agent.record(reward_sum, i)
         scores.append(reward_sum)
     print("generation {} max score {}".format(agent.current_generation, np.max(scores)))
