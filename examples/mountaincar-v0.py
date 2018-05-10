@@ -7,8 +7,8 @@ env = gym.make('MountainCar-v0')
 
 done = False
 
-strain_count = 100
-generation_check = 1
+strain_count = 10
+generation_check = 10
 agent = Species(input_count=2, output_count=3, hidden=3, depth=0,
                 strain_count=strain_count, final_activation='softmax')
 
@@ -35,7 +35,8 @@ while True:
             # env.render()
             if done:
                 break
-        reward_sum = reward_sum + max_position + (abs(min_position)/2)
+        # negative_reward + distance covered
+        reward_sum = reward_sum + ((max_position + 1.2) - (min_position + 1.2))
         agent.record(reward_sum, i)
         scores.append(reward_sum)
     print("generation {} max score {}".format(agent.current_generation, np.max(scores)))
