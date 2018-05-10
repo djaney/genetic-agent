@@ -4,7 +4,7 @@ import math
 from operator import mul
 from functools import reduce
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, LeakyReLU
 
 
 def restore_strain(strain, shapes):
@@ -65,10 +65,10 @@ class Species(object):
 
     def create_model(self):
         model = Sequential()
-        model.add(Dense(self.hidden, input_shape=[self.input], activation='tanh'))
+        model.add(Dense(self.hidden, input_shape=[self.input], activation=LeakyReLU(alpha=0.3)))
         for _ in range(self.depth):
-            model.add(Dense(self.hidden, activation='tanh'))
-        model.add(Dense(self.output, activation='tanh'))
+            model.add(Dense(self.hidden, activation=LeakyReLU(alpha=0.3)))
+        model.add(Dense(self.output, activation='softmax'))
         return model
 
     def get_best_reward(self):
