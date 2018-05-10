@@ -7,8 +7,8 @@ env = gym.make('MountainCar-v0')
 
 done = False
 
-strain_count = 10
-generation_check = 10
+strain_count = 100
+generation_check = 1
 agent = Species(input_count=2, output_count=3, hidden=1, depth=1,
                 strain_count=strain_count, final_activation='softmax')
 
