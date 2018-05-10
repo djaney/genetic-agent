@@ -10,7 +10,7 @@ done = False
 strain_count = 10
 passing_score = 500
 agent = Species(input_count=env.observation_space.shape[0], output_count=env.action_space.n, hidden=1, depth=1,
-                strain_count=strain_count)
+                strain_count=strain_count, final_activation='softmax')
 
 # learn
 gen = 0

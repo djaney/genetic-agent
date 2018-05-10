@@ -31,7 +31,8 @@ class Species(object):
 
     """
 
-    def __init__(self, input_count, output_count, hidden, depth, strain_count=10, mutation_chance=0.01, carry_over=0.2, save=None):
+    def __init__(self, input_count, output_count, hidden, depth, strain_count=10, mutation_chance=0.01, carry_over=0.2,
+                 final_activation='linear'):
         self.input = input_count
         self.output = output_count
         self.hidden = hidden
@@ -40,12 +41,12 @@ class Species(object):
         self.strains = []
         self.next_gen = []
         self.strain_count = strain_count
-        self.model = self.create_model()
         self.mutation_chance = mutation_chance
         self.best = 0
         self.carry_over = carry_over
         self.current_generation = 1
-        self.save_name = save
+        self.final_activation = final_activation
+        self.model = self.create_model()
 
         for _ in range(self.strain_count):
             self.strains.append(self.create_model())
@@ -65,10 +66,12 @@ class Species(object):
 
     def create_model(self):
         model = Sequential()
-        model.add(Dense(self.hidden, input_shape=[self.input], activation=LeakyReLU(alpha=0.3)))
+        model.add(Dense(self.hidden, input_shape=[self.input]))
+        model.add(LeakyReLU(alpha=0.3))
         for _ in range(self.depth):
-            model.add(Dense(self.hidden, activation=LeakyReLU(alpha=0.3)))
-        model.add(Dense(self.output, activation='softmax'))
+            model.add(Dense(self.hidden))
+            model.add(LeakyReLU(alpha=0.3))
+        model.add(Dense(self.output, activation=self.final_activation))
         return model
 
     def get_best_reward(self):
