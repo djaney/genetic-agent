@@ -1,3 +1,11 @@
+class Population:
+    def __init__(self, size, inputs, outputs):
+        self.population = []
+        self.innovation = inputs + outputs + 1
+        for _ in range(size):
+            self.population.append(Genome(inputs, outputs))
+
+
 class Genome:
     def __init__(self, input_count, output_count):
         self.nodes = []
