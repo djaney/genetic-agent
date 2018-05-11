@@ -21,6 +21,17 @@ class Node:
         self.in_connections = []
         self.out_connections = []
 
+    def connect_to(self, next_node):
+        # create connection
+        connection = Connections()
+        # attach to self
+        self.out_connections.append(connection)
+        # attach to next
+        next_node.in_connections.append(connection)
+        # set connection codes
+        connection.node_in = self
+        connection.node_out = next_node
+
 
 class Connections:
     def __init__(self):
