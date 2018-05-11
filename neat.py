@@ -2,18 +2,19 @@ class Genome:
     def __init__(self, input_count, output_count):
         self.nodes = []
         self.connections = []
-        self.id_counter = 1
 
+        innovation = 1
         for _ in range(input_count):
-            self.create_node(Node.TYPE_INPUT)
+            self.create_node(Node.TYPE_INPUT, innovation)
+            innovation = innovation + 1
 
         for _ in range(output_count):
-            self.create_node(Node.TYPE_OUTPUT)
+            self.create_node(Node.TYPE_OUTPUT, innovation)
+            innovation = innovation + 1
 
-    def create_node(self, node_type):
-        new_node = Node(self.id_counter, node_type)
+    def create_node(self, node_type, innovation):
+        new_node = Node(innovation, node_type)
         self.nodes.append(new_node)
-        self.id_counter = self.id_counter + 1
         return new_node
 
     def remove_node(self, node_id):
@@ -33,7 +34,7 @@ class Genome:
                     c.get_next_node().get_prev_connections().remove(c)
                 break
 
-    def create_node_between(self, first_id, second_id):
+    def create_node_between(self, first_id, second_id, innovation):
 
         first_node = self.select_node_by_id(first_id)
         second_node = self.select_node_by_id(second_id)
@@ -60,7 +61,7 @@ class Genome:
             self.connections.remove(existing_connection)
 
         # create node
-        new_node = self.create_node(Node.TYPE_HIDDEN)
+        new_node = self.create_node(Node.TYPE_HIDDEN, innovation)
 
         # connect node
         self.connect_nodes(first_node, new_node)

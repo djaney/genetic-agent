@@ -44,7 +44,7 @@ class TestGenomeMethods(unittest.TestCase):
 
     def test_remove_node(self):
         g = Genome(1, 1)
-        g.create_node(Node.TYPE_HIDDEN)
+        g.create_node(Node.TYPE_HIDDEN, 3)
         g.nodes[0].connect_to(g.nodes[2])
         g.nodes[2].connect_to(g.nodes[1])
 
@@ -60,10 +60,10 @@ class TestGenomeMethods(unittest.TestCase):
     def test_create_node_between(self):
         g = Genome(1, 1)
 
-        g.create_node_between(1, 2)
+        g.create_node_between(1, 2, 3)
         self.assertEqual(2, len(g.connections))
 
-        g.create_node_between(3, 2)
+        g.create_node_between(3, 2, 4)
 
         self.assertEqual(3, len(g.connections))
 
@@ -84,7 +84,7 @@ class TestGenomeMethods(unittest.TestCase):
         g.connect_nodes_by_id(1, 4)
         g.connect_nodes_by_id(2, 4)
         g.connect_nodes_by_id(3, 4)
-        g.create_node_between(2, 4)
+        g.create_node_between(2, 4, 5)
         g.connect_nodes_by_id(1, 5)
 
         self.assertEqual(True, g.select_node_by_id(1).is_connected_to_next_by_id(4))
@@ -102,7 +102,7 @@ class TestGenomeMethods(unittest.TestCase):
         g.connect_nodes_by_id(1, 4)
         g.connect_nodes_by_id(2, 4)
         g.connect_nodes_by_id(3, 4)
-        g.create_node_between(2, 4)
+        g.create_node_between(2, 4, 5)
         g.connect_nodes_by_id(1, 5)
 
         self.assertEqual(True, g.select_node_by_id(1).is_connected_to_next_by_id(4))
@@ -112,7 +112,7 @@ class TestGenomeMethods(unittest.TestCase):
         self.assertEqual(True, g.select_node_by_id(5).is_connected_to_next_by_id(4))
         self.assertEqual(True, g.select_node_by_id(3).is_connected_to_next_by_id(4))
 
-        g.create_node_between(3, 4)
+        g.create_node_between(3, 4, 6)
         self.assertIsNotNone(g.select_node_by_id(6))
         self.assertIsNone(g.select_node_by_id(7))
 
