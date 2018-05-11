@@ -10,7 +10,7 @@ class TestNodeMethods(unittest.TestCase):
         n2 = Node(2, Node.TYPE_OUTPUT)
         n1.connect_to(n2)
 
-        self.assertEqual(2, n1.get_next_connections()[0].out_node.get_id())
+        self.assertEqual(2, n1.get_next_connections()[0].out_node.get_innovation())
 
 
 class TestConnectionMethods(unittest.TestCase):
@@ -20,23 +20,23 @@ class TestConnectionMethods(unittest.TestCase):
         n2 = Node(2, Node.TYPE_OUTPUT)
         n1.connect_to(n2)
 
-        self.assertEqual(2, n1.get_next_connections()[0].get_next_node().get_id())
+        self.assertEqual(2, n1.get_next_connections()[0].get_next_node().get_innovation())
 
     def test_prev(self):
         n1 = Node(1, Node.TYPE_INPUT)
         n2 = Node(2, Node.TYPE_OUTPUT)
         n1.connect_to(n2)
 
-        self.assertEqual(1, n2.get_prev_connections()[0].get_prev_node().get_id())
+        self.assertEqual(1, n2.get_prev_connections()[0].get_prev_node().get_innovation())
 
 
 class TestGenomeMethods(unittest.TestCase):
 
     def test_init(self):
         g = Genome(2, 1)
-        self.assertEqual(1, g.nodes[0].get_id())
-        self.assertEqual(2, g.nodes[1].get_id())
-        self.assertEqual(3, g.nodes[2].get_id())
+        self.assertEqual(1, g.nodes[0].get_innovation())
+        self.assertEqual(2, g.nodes[1].get_innovation())
+        self.assertEqual(3, g.nodes[2].get_innovation())
 
         self.assertEqual(Node.TYPE_INPUT, g.nodes[0].get_type())
         self.assertEqual(Node.TYPE_INPUT, g.nodes[1].get_type())
@@ -48,9 +48,9 @@ class TestGenomeMethods(unittest.TestCase):
         g.nodes[0].connect_to(g.nodes[2])
         g.nodes[2].connect_to(g.nodes[1])
 
-        self.assertEqual(3, g.nodes[0].get_next_connections()[0].get_next_node().get_id())
+        self.assertEqual(3, g.nodes[0].get_next_connections()[0].get_next_node().get_innovation())
         self.assertEqual(2, g.nodes[0].get_next_connections()[0].get_next_node().get_next_connections()[
-            0].get_next_node().get_id())
+            0].get_next_node().get_innovation())
 
         g.remove_node(3)
         self.assertEqual(0, len(g.connections))
@@ -68,16 +68,16 @@ class TestGenomeMethods(unittest.TestCase):
         self.assertEqual(3, len(g.connections))
 
         current_node = g.nodes[0]
-        self.assertEqual(1, g.nodes[0].get_id())
+        self.assertEqual(1, g.nodes[0].get_innovation())
 
         current_node = current_node.get_next_connections()[0].get_next_node()
-        self.assertEqual(3, current_node.get_id())
+        self.assertEqual(3, current_node.get_innovation())
 
         current_node = current_node.get_next_connections()[0].get_next_node()
-        self.assertEqual(4, current_node.get_id())
+        self.assertEqual(4, current_node.get_innovation())
 
         current_node = current_node.get_next_connections()[0].get_next_node()
-        self.assertEqual(2, current_node.get_id())
+        self.assertEqual(2, current_node.get_innovation())
 
     def test_mutate_add_connection(self):
         g = Genome(3, 1)

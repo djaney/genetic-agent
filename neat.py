@@ -18,7 +18,7 @@ class Genome:
 
     def remove_node(self, node_id):
         for node in self.nodes:
-            if node_id == node.get_id():
+            if node_id == node.get_innovation():
                 prev_connections = node.get_prev_connections()
                 next_connections = node.get_next_connections()
                 # remove node
@@ -79,7 +79,7 @@ class Genome:
     def select_node_by_id(self, node_id):
         node = None
         for n in self.nodes:
-            if n.get_id() == node_id:
+            if n.get_innovation() == node_id:
                 node = n
                 break
         return node
@@ -96,14 +96,14 @@ class Node:
     TYPE_OUTPUT = 2
     TYPE_HIDDEN = 3
 
-    def __init__(self, number, node_type):
-        self.number = number
+    def __init__(self, innovation, node_type):
+        self.innovation = innovation
         self.node_type = node_type
         self.in_connections = []
         self.out_connections = []
 
-    def get_id(self):
-        return self.number
+    def get_innovation(self):
+        return self.innovation
 
     def get_type(self):
         return self.node_type
@@ -129,14 +129,14 @@ class Node:
     def is_connected_to_next_by_id(self, node_id):
         result = False
         for c in self.get_next_connections():
-            if c.get_next_node().get_id() == node_id:
+            if c.get_next_node().get_innovation() == node_id:
                 result = True
         return result
 
     def is_connected_to_prev_by_id(self, node_id):
         result = False
         for c in self.get_prev_connections():
-            if c.get_prev_node().get_id() == node_id:
+            if c.get_prev_node().get_innovation() == node_id:
                 result = True
         return result
 
