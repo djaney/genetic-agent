@@ -49,12 +49,35 @@ class TestGenomeMethods(unittest.TestCase):
         g.nodes[2].connect_to(g.nodes[1])
 
         self.assertEqual(3, g.nodes[0].get_next_connections()[0].get_next_node().get_id())
-        self.assertEqual(2, g.nodes[0].get_next_connections()[0].get_next_node().get_next_connections()[0].get_next_node().get_id())
+        self.assertEqual(2, g.nodes[0].get_next_connections()[0].get_next_node().get_next_connections()[
+            0].get_next_node().get_id())
 
         g.remove_node(3)
         self.assertEqual(0, len(g.connections))
         self.assertEqual(0, len(g.nodes[0].get_next_connections()))
         self.assertEqual(0, len(g.nodes[1].get_prev_connections()))
+
+    def test_create_node_between(self):
+        g = Genome(1, 1)
+
+        g.create_node_between(1, 2)
+        self.assertEqual(2, len(g.connections))
+
+        g.create_node_between(3, 2)
+
+        self.assertEqual(3, len(g.connections))
+
+        current_node = g.nodes[0]
+        self.assertEqual(1, g.nodes[0].get_id())
+
+        current_node = current_node.get_next_connections()[0].get_next_node()
+        self.assertEqual(3, current_node.get_id())
+
+        current_node = current_node.get_next_connections()[0].get_next_node()
+        self.assertEqual(4, current_node.get_id())
+
+        current_node = current_node.get_next_connections()[0].get_next_node()
+        self.assertEqual(2, current_node.get_id())
 
 
 if __name__ == '__main__':
