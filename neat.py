@@ -33,19 +33,10 @@ class Genome:
                     c.get_next_node().get_prev_connections().remove(c)
                 break
 
-    def create_node_between(self, first, second):
-        first_node = None
-        second_node = None
+    def create_node_between(self, first_id, second_id):
 
-        for n in self.nodes:
-            if n.get_id() == first:
-                first_node = n
-                break
-
-        for n in self.nodes:
-            if n.get_id() == second:
-                second_node = n
-                break
+        first_node = self.select_node_by_id(first_id)
+        second_node = self.select_node_by_id(second_id)
 
         # check first node
         if first_node is None:
@@ -72,9 +63,26 @@ class Genome:
         new_node = self.create_node(Node.TYPE_HIDDEN)
 
         # connect node
-        self.connections.append(first_node.connect_to(new_node))
-        self.connections.append(new_node.connect_to(second_node))
+        self.connect_nodes(first_node, new_node)
+        self.connect_nodes(new_node, second_node)
 
+    def connect_nodes(self, first_node, second_node):
+        # connect node
+        self.connections.append(first_node.connect_to(second_node))
+
+    def connect_nodes_by_id(self, first_id, second_id):
+        first_node = self.select_node_by_id(first_id)
+        second_node = self.select_node_by_id(second_id)
+        # connect node
+        self.connect_nodes(first_node, second_node)
+
+    def select_node_by_id(self, node_id):
+        node = None
+        for n in self.nodes:
+            if n.get_id() == node_id:
+                node = n
+                break
+        return node
 
     def mutate_nodes(self):
         pass
@@ -117,6 +125,20 @@ class Node:
 
     def get_prev_connections(self):
         return self.in_connections
+
+    def is_connected_to_next_by_id(self, node_id):
+        result = False
+        for c in self.get_next_connections():
+            if c.get_next_node().get_id() == node_id:
+                result = True
+        return result
+
+    def is_connected_to_prev_by_id(self, node_id):
+        result = False
+        for c in self.get_prev_connections():
+            if c.get_prev_node().get_id() == node_id:
+                result = True
+        return result
 
 
 class Connections:

@@ -79,6 +79,17 @@ class TestGenomeMethods(unittest.TestCase):
         current_node = current_node.get_next_connections()[0].get_next_node()
         self.assertEqual(2, current_node.get_id())
 
+    def test_mutate_add_connection(self):
+        g = Genome(3, 1)
+        g.connect_nodes_by_id(1, 4)
+        g.connect_nodes_by_id(2, 4)
+        g.connect_nodes_by_id(3, 4)
+        g.create_node_between(2, 4)
+        g.connect_nodes_by_id(1, 5)
+
+        self.assertEqual(True, g.select_node_by_id(1).is_connected_to_next_by_id(4))
+        self.assertEqual(True, g.select_node_by_id(4).is_connected_to_prev_by_id(1))
+
 
 if __name__ == '__main__':
     unittest.main()
