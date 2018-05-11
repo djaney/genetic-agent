@@ -89,6 +89,32 @@ class TestGenomeMethods(unittest.TestCase):
 
         self.assertEqual(True, g.select_node_by_id(1).is_connected_to_next_by_id(4))
         self.assertEqual(True, g.select_node_by_id(4).is_connected_to_prev_by_id(1))
+        self.assertEqual(True, g.select_node_by_id(1).is_connected_to_next_by_id(5))
+        self.assertEqual(True, g.select_node_by_id(2).is_connected_to_next_by_id(5))
+        self.assertEqual(True, g.select_node_by_id(5).is_connected_to_next_by_id(4))
+        self.assertEqual(True, g.select_node_by_id(3).is_connected_to_next_by_id(4))
+
+        g.connect_nodes_by_id(3, 5)
+        self.assertEqual(True, g.select_node_by_id(3).is_connected_to_next_by_id(5))
+
+    def test_mutate_add_node(self):
+        g = Genome(3, 1)
+        g.connect_nodes_by_id(1, 4)
+        g.connect_nodes_by_id(2, 4)
+        g.connect_nodes_by_id(3, 4)
+        g.create_node_between(2, 4)
+        g.connect_nodes_by_id(1, 5)
+
+        self.assertEqual(True, g.select_node_by_id(1).is_connected_to_next_by_id(4))
+        self.assertEqual(True, g.select_node_by_id(4).is_connected_to_prev_by_id(1))
+        self.assertEqual(True, g.select_node_by_id(1).is_connected_to_next_by_id(5))
+        self.assertEqual(True, g.select_node_by_id(2).is_connected_to_next_by_id(5))
+        self.assertEqual(True, g.select_node_by_id(5).is_connected_to_next_by_id(4))
+        self.assertEqual(True, g.select_node_by_id(3).is_connected_to_next_by_id(4))
+
+        g.create_node_between(3, 4)
+        self.assertIsNotNone(g.select_node_by_id(6))
+        self.assertIsNone(g.select_node_by_id(7))
 
 
 if __name__ == '__main__':
