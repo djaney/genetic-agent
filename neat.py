@@ -14,6 +14,23 @@ class Genome:
         self.nodes.append(Node(self.id_counter, node_type))
         self.id_counter = self.id_counter + 1
 
+    def remove_node(self, node_id):
+        for node in self.nodes:
+            if node_id == node.get_id():
+                prev_connections = node.get_prev_connections()
+                next_connections = node.get_next_connections()
+                # remove node
+                self.nodes.remove(node)
+
+                # remove connection from previous node
+                for c in prev_connections:
+                    c.get_prev_node().get_next_connections().remove(c)
+
+                # remove connections from next nodes
+                for c in next_connections:
+                    c.get_next_node().get_prev_connections().remove(c)
+                break
+
     def mutate_nodes(self):
         pass
 
@@ -38,7 +55,6 @@ class Node:
     def get_type(self):
         return self.node_type
 
-
     def connect_to(self, next_node):
         # create connection
         connection = Connections()
@@ -62,8 +78,8 @@ class Connections:
         self.in_node = None
         self.out_node = None
 
-    def get_next(self):
+    def get_next_node(self):
         return self.out_node
 
-    def get_prev(self):
+    def get_prev_node(self):
         return self.in_node
