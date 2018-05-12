@@ -1,7 +1,7 @@
 class Population:
     def __init__(self, size, inputs, outputs):
         self.population = []
-        self.conn_innovation = inputs + outputs + 1
+        self.node_innovation = inputs + outputs + 1
         self.conn_innovation = 1
         for _ in range(size):
             self.population.append(Genome(inputs, outputs))
