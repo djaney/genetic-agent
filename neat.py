@@ -42,7 +42,7 @@ class Genome:
                     c.get_next_node().get_prev_connections().remove(c)
                 break
 
-    def create_node_between(self, first_id, second_id, innovation):
+    def create_node_between(self, first_id, second_id, innovation, conn_innovation):
 
         first_node = self.select_node_by_id(first_id)
         second_node = self.select_node_by_id(second_id)
@@ -72,18 +72,18 @@ class Genome:
         new_node = self.create_node(Node.TYPE_HIDDEN, innovation)
 
         # connect node
-        self.connect_nodes(first_node, new_node)
-        self.connect_nodes(new_node, second_node)
+        self.connect_nodes(first_node, new_node, conn_innovation)
+        self.connect_nodes(new_node, second_node, conn_innovation+1)
 
-    def connect_nodes(self, first_node, second_node):
+    def connect_nodes(self, first_node, second_node, conn_innovation):
         # connect node
-        self.connections.append(first_node.connect_to(second_node))
+        self.connections.append(first_node.connect_to(second_node, conn_innovation))
 
-    def connect_nodes_by_id(self, first_id, second_id):
+    def connect_nodes_by_id(self, first_id, second_id, conn_innovation):
         first_node = self.select_node_by_id(first_id)
         second_node = self.select_node_by_id(second_id)
         # connect node
-        self.connect_nodes(first_node, second_node)
+        self.connect_nodes(first_node, second_node, conn_innovation)
 
     def select_node_by_id(self, node_id):
         node = None
@@ -117,9 +117,9 @@ class Node:
     def get_type(self):
         return self.node_type
 
-    def connect_to(self, next_node):
+    def connect_to(self, next_node, conn_innovation):
         # create connection
-        connection = Connections()
+        connection = Connections(conn_innovation)
         # attach to self
         self.out_connections.append(connection)
         # attach to next
@@ -151,12 +151,16 @@ class Node:
 
 
 class Connections:
-    def __init__(self):
+    def __init__(self, innovation):
         self.in_node = None
         self.out_node = None
+        self.innovation = innovation
 
     def get_next_node(self):
         return self.out_node
 
     def get_prev_node(self):
         return self.in_node
+
+    def get_innovation(self):
+        return self.innovation
