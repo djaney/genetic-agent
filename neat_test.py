@@ -6,7 +6,7 @@ class TestPopulationMethods(unittest.TestCase):
     def test_init(self):
         p = Population(10, 3, 1)
         self.assertEqual(10, len(p.population))
-        self.assertEqual(5, p.innovation)
+        self.assertEqual(5, p.conn_innovation)
 
 
 class TestNodeMethods(unittest.TestCase):
