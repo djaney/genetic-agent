@@ -17,7 +17,7 @@ class TestPopulationMethods(unittest.TestCase):
         g1.connect_nodes_by_id(3, 4, 3)
         g1.connect_nodes_by_id(2, 5, 4)
         g1.connect_nodes_by_id(5, 4, 5)
-        g1.connect_nodes_by_id(1, 5, 6)
+        g1.connect_nodes_by_id(1, 5, 8)
 
         g2 = Genome(3, 1)
         g2.create_node(Node.TYPE_HIDDEN, 5)
@@ -32,6 +32,35 @@ class TestPopulationMethods(unittest.TestCase):
         g2.connect_nodes_by_id(6, 4, 7)
         g2.connect_nodes_by_id(3, 5, 9)
         g2.connect_nodes_by_id(1, 6, 10)
+
+        p = Population(2, 3, 1)
+        p.population[0] = g1
+        p.population[1] = g2
+
+        a1, a2 = p.align_genome(g1, g2)
+
+        self.assertEqual(1, a1[0].get_innovation())
+        self.assertEqual(2, a1[1].get_innovation())
+        self.assertEqual(3, a1[2].get_innovation())
+        self.assertEqual(4, a1[3].get_innovation())
+        self.assertEqual(5, a1[4].get_innovation())
+        self.assertEqual(None, a1[5])
+        self.assertEqual(None, a1[6])
+        self.assertEqual(8, a1[7].get_innovation())
+        self.assertEqual(None, a1[8])
+        self.assertEqual(None, a1[9])
+
+        self.assertEqual(1, a2[0].get_innovation())
+        self.assertEqual(2, a2[1].get_innovation())
+        self.assertEqual(3, a2[2].get_innovation())
+        self.assertEqual(4, a2[3].get_innovation())
+        self.assertEqual(5, a2[4].get_innovation())
+        self.assertEqual(6, a2[5].get_innovation())
+        self.assertEqual(7, a2[6].get_innovation())
+        self.assertEqual(None, a2[7])
+        self.assertEqual(9, a2[8].get_innovation())
+        self.assertEqual(10, a2[9].get_innovation())
+
 
 
 class TestNodeMethods(unittest.TestCase):

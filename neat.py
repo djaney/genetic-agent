@@ -1,3 +1,7 @@
+from functools import reduce
+import numpy as np
+
+
 class Population:
     def __init__(self, size, inputs, outputs):
         self.population = []
@@ -5,6 +9,23 @@ class Population:
         self.conn_innovation = 1
         for _ in range(size):
             self.population.append(Genome(inputs, outputs))
+
+    def align_genome(self, g1, g2):
+        max_innovation = np.max([g1.max_connection_innovation(), g2.max_connection_innovation()])
+        a1 = []
+        a2 = []
+        for i in range(max_innovation):
+            try:
+                a1.append(g1.select_connection_by_innovation(i + 1))
+            except:
+                a1.append(None)
+
+            try:
+                a2.append(g2.select_connection_by_innovation(i + 1))
+            except:
+                a2.append(None)
+
+        return a1, a2
 
 
 class Genome:
@@ -73,7 +94,14 @@ class Genome:
 
         # connect node
         self.connect_nodes(first_node, new_node, conn_innovation)
-        self.connect_nodes(new_node, second_node, conn_innovation+1)
+        self.connect_nodes(new_node, second_node, conn_innovation + 1)
+
+    def max_connection_innovation(self):
+        max_innovation = 0
+        for c in self.connections:
+            max_innovation = np.max([c.get_innovation(), max_innovation])
+
+        return max_innovation
 
     def connect_nodes(self, first_node, second_node, conn_innovation):
         # connect node
