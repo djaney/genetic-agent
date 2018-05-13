@@ -9,6 +9,30 @@ class TestPopulationMethods(unittest.TestCase):
         self.assertEqual(5, p.node_innovation)
         self.assertEqual(1, p.conn_innovation)
 
+    def test_align_genome(self):
+        g1 = Genome(3, 1)
+        g1.create_node(Node.TYPE_HIDDEN, 5)
+        g1.connect_nodes_by_id(1, 4, 1)
+        g1.connect_nodes_by_id(2, 4, 2)
+        g1.connect_nodes_by_id(3, 4, 3)
+        g1.connect_nodes_by_id(2, 5, 4)
+        g1.connect_nodes_by_id(5, 4, 5)
+        g1.connect_nodes_by_id(1, 5, 6)
+
+        g2 = Genome(3, 1)
+        g2.create_node(Node.TYPE_HIDDEN, 5)
+        g2.create_node(Node.TYPE_HIDDEN, 6)
+
+        g2.connect_nodes_by_id(1, 4, 1)
+        g2.connect_nodes_by_id(2, 4, 2)
+        g2.connect_nodes_by_id(3, 4, 3)
+        g2.connect_nodes_by_id(2, 5, 4)
+        g2.connect_nodes_by_id(5, 4, 5)
+        g2.connect_nodes_by_id(5, 6, 6)
+        g2.connect_nodes_by_id(6, 4, 7)
+        g2.connect_nodes_by_id(3, 5, 9)
+        g2.connect_nodes_by_id(1, 6, 10)
+
 
 class TestNodeMethods(unittest.TestCase):
 

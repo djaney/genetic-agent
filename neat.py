@@ -92,6 +92,10 @@ class Genome:
             if n.get_innovation() == node_id:
                 node = n
                 break
+
+        if node is None:
+            raise Exception("node not found")
+
         return node
 
     def mutate_nodes(self):
