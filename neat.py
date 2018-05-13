@@ -19,6 +19,7 @@ def align_genome(g1, g2):
 
     return a1, a2
 
+
 def crossover(a1, a2):
     pass
 

@@ -93,6 +93,18 @@ class TestPopulationMethods(unittest.TestCase):
 
         g3 = crossover(a1, a2)
 
+        self.assertEqual(1, g3.select_connection_by_innovation(1).get_innovation())
+        self.assertEqual(2, g3.select_connection_by_innovation(2).get_innovation())
+        self.assertEqual(3, g3.select_connection_by_innovation(3).get_innovation())
+        self.assertEqual(4, g3.select_connection_by_innovation(4).get_innovation())
+        self.assertEqual(5, g3.select_connection_by_innovation(5).get_innovation())
+        self.assertEqual(6, g3.select_connection_by_innovation(6).get_innovation())
+        self.assertEqual(7, g3.select_connection_by_innovation(7).get_innovation())
+        self.assertEqual(8, g3.select_connection_by_innovation(8).get_innovation())
+        self.assertEqual(9, g3.select_connection_by_innovation(9).get_innovation())
+        self.assertEqual(10, g3.select_connection_by_innovation(10).get_innovation())
+
+
 class TestNodeMethods(unittest.TestCase):
 
     def test_connect_to(self):
