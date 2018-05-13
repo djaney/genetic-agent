@@ -21,7 +21,6 @@ def align_genome(g1, g2):
 
 
 def crossover(a1, a2):
-
     if len(a1) != len(a2):
         raise Exception('inputs not the same length')
 
@@ -51,6 +50,7 @@ def crossover(a1, a2):
         if next_node not in child_genome.nodes:
             child_genome.nodes.append(next_node)
     return child_genome
+
 
 class Population:
     def __init__(self, size, inputs, outputs):
