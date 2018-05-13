@@ -2,6 +2,27 @@ from functools import reduce
 import numpy as np
 
 
+def align_genome(g1, g2):
+    max_innovation = np.max([g1.max_connection_innovation(), g2.max_connection_innovation()])
+    a1 = []
+    a2 = []
+    for i in range(max_innovation):
+        try:
+            a1.append(g1.select_connection_by_innovation(i + 1))
+        except:
+            a1.append(None)
+
+        try:
+            a2.append(g2.select_connection_by_innovation(i + 1))
+        except:
+            a2.append(None)
+
+    return a1, a2
+
+def crossover(a1, a2):
+    pass
+
+
 class Population:
     def __init__(self, size, inputs, outputs):
         self.population = []
@@ -9,23 +30,6 @@ class Population:
         self.conn_innovation = 1
         for _ in range(size):
             self.population.append(Genome(inputs, outputs))
-
-    def align_genome(self, g1, g2):
-        max_innovation = np.max([g1.max_connection_innovation(), g2.max_connection_innovation()])
-        a1 = []
-        a2 = []
-        for i in range(max_innovation):
-            try:
-                a1.append(g1.select_connection_by_innovation(i + 1))
-            except:
-                a1.append(None)
-
-            try:
-                a2.append(g2.select_connection_by_innovation(i + 1))
-            except:
-                a2.append(None)
-
-        return a1, a2
 
 
 class Genome:

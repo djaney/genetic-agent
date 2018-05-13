@@ -1,5 +1,5 @@
 import unittest
-from neat import Node, Genome, Population
+from neat import Node, Genome, Population, align_genome, crossover
 
 
 class TestPopulationMethods(unittest.TestCase):
@@ -37,7 +37,7 @@ class TestPopulationMethods(unittest.TestCase):
         p.population[0] = g1
         p.population[1] = g2
 
-        a1, a2 = p.align_genome(g1, g2)
+        a1, a2 = align_genome(g1, g2)
 
         self.assertEqual(1, a1[0].get_innovation())
         self.assertEqual(2, a1[1].get_innovation())
@@ -61,7 +61,37 @@ class TestPopulationMethods(unittest.TestCase):
         self.assertEqual(9, a2[8].get_innovation())
         self.assertEqual(10, a2[9].get_innovation())
 
+    def test_crossover(self):
+        g1 = Genome(3, 1)
+        g1.create_node(Node.TYPE_HIDDEN, 5)
+        g1.connect_nodes_by_id(1, 4, 1)
+        g1.connect_nodes_by_id(2, 4, 2)
+        g1.connect_nodes_by_id(3, 4, 3)
+        g1.connect_nodes_by_id(2, 5, 4)
+        g1.connect_nodes_by_id(5, 4, 5)
+        g1.connect_nodes_by_id(1, 5, 8)
 
+        g2 = Genome(3, 1)
+        g2.create_node(Node.TYPE_HIDDEN, 5)
+        g2.create_node(Node.TYPE_HIDDEN, 6)
+
+        g2.connect_nodes_by_id(1, 4, 1)
+        g2.connect_nodes_by_id(2, 4, 2)
+        g2.connect_nodes_by_id(3, 4, 3)
+        g2.connect_nodes_by_id(2, 5, 4)
+        g2.connect_nodes_by_id(5, 4, 5)
+        g2.connect_nodes_by_id(5, 6, 6)
+        g2.connect_nodes_by_id(6, 4, 7)
+        g2.connect_nodes_by_id(3, 5, 9)
+        g2.connect_nodes_by_id(1, 6, 10)
+
+        p = Population(2, 3, 1)
+        p.population[0] = g1
+        p.population[1] = g2
+
+        a1, a2 = align_genome(g1, g2)
+
+        g3 = crossover(a1, a2)
 
 class TestNodeMethods(unittest.TestCase):
 
