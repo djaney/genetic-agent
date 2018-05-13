@@ -7,15 +7,8 @@ def align_genome(g1, g2):
     a1 = []
     a2 = []
     for i in range(max_innovation):
-        try:
-            a1.append(g1.select_connection_by_innovation(i + 1))
-        except:
-            a1.append(None)
-
-        try:
-            a2.append(g2.select_connection_by_innovation(i + 1))
-        except:
-            a2.append(None)
+        a1.append(g1.select_connection_by_innovation(i + 1, throw_not_found=False))
+        a2.append(g2.select_connection_by_innovation(i + 1, throw_not_found=False))
 
     return a1, a2
 
@@ -164,14 +157,14 @@ class Genome:
     def mutate_connections(self):
         pass
 
-    def select_connection_by_innovation(self, innovation):
+    def select_connection_by_innovation(self, innovation, throw_not_found=True):
         connection = None
         for c in self.connections:
             if c.get_innovation() == innovation:
                 connection = c
                 break
 
-        if connection is None:
+        if throw_not_found and connection is None:
             raise Exception("connection not found")
 
         return connection
