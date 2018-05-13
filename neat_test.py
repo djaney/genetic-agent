@@ -93,6 +93,9 @@ class TestPopulationMethods(unittest.TestCase):
 
         g3 = crossover(a1, a2)
 
+        self.assertEqual(10, len(g3.connections))
+        self.assertEqual(6, len(g3.nodes))
+
         self.assertEqual(1, g3.select_connection_by_innovation(1).get_innovation())
         self.assertEqual(2, g3.select_connection_by_innovation(2).get_innovation())
         self.assertEqual(3, g3.select_connection_by_innovation(3).get_innovation())

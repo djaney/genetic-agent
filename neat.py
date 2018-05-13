@@ -38,9 +38,9 @@ def crossover(a1, a2):
         next_node = c.get_next_node()
         if c not in child_genome.connections:
             child_genome.connections.append(c)
-        if prev_node not in child_genome.nodes:
+        if not child_genome.has_node_with_innovation(prev_node.get_innovation()):
             child_genome.nodes.append(prev_node)
-        if next_node not in child_genome.nodes:
+        if not child_genome.has_node_with_innovation(next_node.get_innovation()):
             child_genome.nodes.append(next_node)
     return child_genome
 
@@ -150,6 +150,13 @@ class Genome:
             raise Exception("node not found")
 
         return node
+
+    def has_node_with_innovation(self, node_id):
+        for n in self.nodes:
+            if n.get_innovation() == node_id:
+                return True
+
+        return False
 
     def mutate_nodes(self):
         pass
