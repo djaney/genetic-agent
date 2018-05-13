@@ -1,5 +1,5 @@
-from functools import reduce
 import numpy as np
+import random
 
 
 def align_genome(g1, g2):
@@ -21,8 +21,36 @@ def align_genome(g1, g2):
 
 
 def crossover(a1, a2):
-    pass
 
+    if len(a1) != len(a2):
+        raise Exception('inputs not the same length')
+
+    child_connections = []
+    for i in range(len(a1)):
+
+        if a1[i] is not None and a2[i] is not None:
+            if random.random() > 0.5:
+                child_connections.append(a1[i])
+            else:
+                child_connections.append(a2[i])
+        elif a1[i] is None and a2[i] is not None:
+            child_connections.append(a2[i])
+        elif a1[i] is not None and a2[i] is None:
+            child_connections.append(a1[i])
+        else:
+            # disjoint
+            pass
+    child_genome = Genome(0, 0)
+    for c in child_connections:
+        prev_node = c.get_prev_node()
+        next_node = c.get_next_node()
+        if c not in child_genome.connections:
+            child_genome.connections.append(c)
+        if prev_node not in child_genome.nodes:
+            child_genome.nodes.append(prev_node)
+        if next_node not in child_genome.nodes:
+            child_genome.nodes.append(next_node)
+    return child_genome
 
 class Population:
     def __init__(self, size, inputs, outputs):
