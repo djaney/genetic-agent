@@ -97,7 +97,7 @@ class TestGenomeMethods(unittest.TestCase):
         self.assertEqual(1, g.connections[0].get_innovation())
         self.assertEqual(2, g.connections[1].get_innovation())
 
-        g.create_node_between(3, 2, 4, 3)
+        g.create_node_between(3, 2, 4, 3, g.select_connection_by_innovation(2))
 
         self.assertEqual(3, len(g.connections))
 
@@ -148,7 +148,7 @@ class TestGenomeMethods(unittest.TestCase):
 
         g.create_node_between(3, 4, 6, 7)
         self.assertIsNotNone(g.select_node_by_id(6))
-        self.assertIsNone(g.select_node_by_id(7))
+        self.assertRaises(Exception, lambda: g.select_node_by_id(7))
 
 
 if __name__ == '__main__':

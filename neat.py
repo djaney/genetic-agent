@@ -43,7 +43,7 @@ class Genome:
                     c.get_next_node().get_prev_connections().remove(c)
                 break
 
-    def create_node_between(self, first_id, second_id, innovation, conn_innovation):
+    def create_node_between(self, first_id, second_id, innovation, conn_innovation, existing_connection=None):
 
         first_node = self.select_node_by_id(first_id)
         second_node = self.select_node_by_id(second_id)
@@ -57,16 +57,15 @@ class Genome:
             raise Exception("first node doest not exist")
 
         # check if connected
-        existing_connection = None
-        for c in first_node.get_next_connections():
-            if c.get_next_node() is second_node:
-                existing_connection = c
+        # for c in first_node.get_next_connections():
+        #     if c.get_next_node() is second_node:
+        #         existing_connection = c
 
         if existing_connection is not None:
             # if there is an existing connection
             # remove the connection
-            first_node.get_next_connections().remove(existing_connection)
-            second_node.get_prev_connections().remove(existing_connection)
+            existing_connection.get_prev_node().get_next_connections().remove(existing_connection)
+            existing_connection.get_next_node().get_prev_connections().remove(existing_connection)
             self.connections.remove(existing_connection)
 
         # create node
@@ -103,6 +102,18 @@ class Genome:
 
     def mutate_connections(self):
         pass
+
+    def select_connection_by_innovation(self, innovation):
+        connection = None
+        for c in self.connections:
+            if c.get_innovation() == innovation:
+                connection = c
+                break
+
+        if connection is None:
+            raise Exception("connection not found")
+
+        return connection
 
 
 class Node:
