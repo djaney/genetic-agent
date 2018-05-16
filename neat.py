@@ -1,5 +1,6 @@
 import numpy as np
 import random
+from functools import reduce
 
 
 def align_genome(g1, g2):
@@ -21,7 +22,7 @@ def calculate_excess_disjoint(g1, g2):
     for i in range(length - 1, 0, -1):
         if (a1[i] is None) != (a2[i] is None):
             # is excess
-            is_excess = True if i == (length - 1) else a1[i] == a1[i+1]
+            is_excess = True if i == (length - 1) else a1[i] == a1[i + 1]
             if is_excess and disjoint == 0:
                 excess = excess + 1
             else:
@@ -32,9 +33,17 @@ def calculate_excess_disjoint(g1, g2):
     return excess, disjoint
 
 
+def calculate_average_weights(gene):
+    bias_average = reduce(lambda y, n: n.bias + y, gene.nodes) / len(gene.nodes)
+    weight_average = reduce(lambda y, n: n.weight + y, gene.connections) / len(gene.connections)
+
+    return (bias_average + weight_average) / 2
+
+
 def species_distance(g1, g2, population_count, c1=1, c2=1, c3=1):
     excess, disjoint = calculate_excess_disjoint(g1, g2)
-    (c1 * excess / population_count) + (c1 * disjoint / population_count) + (c3 + average_weights)
+    average_weights = (calculate_average_weights(g1) + calculate_average_weights(g2)) / 2
+    return (c1 * excess / population_count) + (c2 * disjoint / population_count) + (c3 + average_weights)
 
 
 def evolve(population):
@@ -221,6 +230,7 @@ class Node:
     def __init__(self, innovation, node_type):
         self.innovation = innovation
         self.node_type = node_type
+        self.bias = 0
         self.in_connections = []
         self.out_connections = []
 
@@ -268,6 +278,7 @@ class Connections:
         self.in_node = None
         self.out_node = None
         self.innovation = innovation
+        self.weight = 0
 
     def get_next_node(self):
         return self.out_node
