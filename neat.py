@@ -13,6 +13,29 @@ def align_genome(g1, g2):
     return a1, a2
 
 
+def calculate_excess_disjoint(g1, g2):
+    a1, a2 = align_genome(g1, g2)
+    length = len(a1)
+    excess = 0
+    disjoint = 0
+    # TODO wa pa nahuman
+    for i in range(length - 1, 0, -1):
+        if (a1[i] is None) != (a2[i] is None):
+            if a1[i] == a1[i+1] or disjoint > 0:
+                excess = excess + 1
+            else:
+                disjoint = disjoint + 1
+        else:
+            break
+
+    return excess
+
+
+def species_distance(g1, g2, population_count, c1=1, c2=1, c3=1):
+    excess, disjoint = calculate_excess_disjoint(g1, g2)
+    (c1 * excess / population_count) + (c1 * disjoint / population_count) + (c3 + average_weights)
+
+
 def evolve(population):
     # if did improve during last 15
     # breed top 40%

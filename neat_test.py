@@ -1,5 +1,5 @@
 import unittest
-from neat import Node, Genome, Population, align_genome, crossover
+from neat import Node, Genome, Population, align_genome, crossover, calculate_excess_disjoint
 
 
 class TestPopulationMethods(unittest.TestCase):
@@ -106,6 +106,9 @@ class TestPopulationMethods(unittest.TestCase):
         self.assertEqual(8, g3.select_connection_by_innovation(8).get_innovation())
         self.assertEqual(9, g3.select_connection_by_innovation(9).get_innovation())
         self.assertEqual(10, g3.select_connection_by_innovation(10).get_innovation())
+
+        self.assertEqual((2, 3), calculate_excess_disjoint(g1, g2))
+
 
 
 class TestNodeMethods(unittest.TestCase):
