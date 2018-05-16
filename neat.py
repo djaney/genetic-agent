@@ -18,17 +18,18 @@ def calculate_excess_disjoint(g1, g2):
     length = len(a1)
     excess = 0
     disjoint = 0
-    # TODO wa pa nahuman
     for i in range(length - 1, 0, -1):
         if (a1[i] is None) != (a2[i] is None):
-            if a1[i] == a1[i+1] or disjoint > 0:
+            # is excess
+            is_excess = True if i == (length - 1) else a1[i] == a1[i+1]
+            if is_excess and disjoint == 0:
                 excess = excess + 1
             else:
                 disjoint = disjoint + 1
         else:
             break
 
-    return excess
+    return excess, disjoint
 
 
 def species_distance(g1, g2, population_count, c1=1, c2=1, c3=1):
