@@ -1,6 +1,6 @@
 import numpy as np
+import math
 import random
-from functools import reduce
 
 
 def align_genome(g1, g2):
@@ -48,17 +48,50 @@ def species_distance(g1, g2, c1=1.0, c2=1.0, c3=3.0):
     return dist
 
 
-def evolve(population):
-    # if did improve during last 15
-    # breed top 40%
-    # copy champion of each species with > 5 genes
-    # 0.1% chance to mate with other species
-    # 80% offspring mutation
-    # 90% chance update weight & 10% to reset
-    # 0.03 chance of new node for small population
-    # 0.05 to add new link or 0.3 if population is big
-    pass
+def evolve(population, generation, elite=0.4, champ_threshold=5, history_check=15, mutation=0.8, weight_update=0.9, new_node=0.03, new_link=0.05):
+    population_size = len(population)
+    new_population = []
+    max_score = np.max([g.score for g in population])
 
+    # if did improve during last 15
+    did_improved = False
+    last_hist_list = [g.score_history[-history_check] for g in population if len(g.score_history) >= history_check]
+    last_score = np.max([g.score for g in population])
+    last_hist_mean = np.mean(last_hist_list) if len(last_hist_list) > 0 else None
+    did_improved = last_hist_mean is None or last_hist_mean < last_score
+    if did_improved:
+        # breed top 40%
+        population = sorted(population, key=lambda x: x.score, reverse=True)
+        elite = population[:math.floor(population_size * elite)]
+        new_population = new_population + breed(elite, generation, mutation=mutation, weight_update=weight_update, new_node=new_node, new_link=new_link)
+        # copy champion of each species with > 5 genes
+        if population_size > champ_threshold:
+            new_population.append(population[0])
+        new_population = new_population + population[population_size-len(new_population):]
+        # 0.1% chance to mate with other species TODO
+
+    else:
+        new_population = population
+
+    return new_population
+
+
+def breed(population, generation, mutation, weight_update, new_node, new_link):
+    initial_size = len(population)
+    new_population = []
+    for _ in range(initial_size):
+        sample = random.sample(population, 2)
+        a1, a2 = align_genome(sample[0], sample[1])
+        g = crossover(a1, a2)
+        g.generation = generation
+        new_population.append(g)
+    # 80% offspring mutation
+    if random.random() < mutation:
+        # 90% chance update weight & 10% to reset TODO
+        # 0.03 chance of new node for small population TODO
+        pass
+
+    return new_population
 
 def crossover(a1, a2):
     if len(a1) != len(a2):
@@ -136,6 +169,9 @@ class Genome:
     def __init__(self, input_count, output_count):
         self.nodes = []
         self.connections = []
+        self.score_history = []
+        self.score = 0
+        self.generation = 1
 
         innovation = 1
         for _ in range(input_count):
@@ -145,6 +181,10 @@ class Genome:
         for _ in range(output_count):
             self.create_node(Node.TYPE_OUTPUT, innovation)
             innovation = innovation + 1
+
+    def set_score(self, score):
+        self.score_history.append(self.score)
+        self.score = score
 
     def create_node(self, node_type, innovation):
         new_node = Node(innovation, node_type)

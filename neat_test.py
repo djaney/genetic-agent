@@ -1,5 +1,5 @@
 import unittest
-from neat import Node, Genome, Population, align_genome, crossover, calculate_excess_disjoint, species_distance
+from neat import Node, Genome, Population, align_genome, crossover, calculate_excess_disjoint, species_distance, evolve
 
 
 class TestPopulationMethods(unittest.TestCase):
@@ -108,6 +108,10 @@ class TestPopulationMethods(unittest.TestCase):
 
         self.assertEqual((2, 3), calculate_excess_disjoint(g1, g2))
         self.assertEqual(5, species_distance(g1, g2))
+
+    def test_evolution(self):
+        p = Population(10, 3, 1)
+        evolve(p.population.get('s0'), 2)
 
 
 class TestNodeMethods(unittest.TestCase):
@@ -225,6 +229,7 @@ class TestGenomeMethods(unittest.TestCase):
         g.create_node_between(3, 4, 6, 7)
         self.assertIsNotNone(g.select_node_by_id(6))
         self.assertRaises(Exception, lambda: g.select_node_by_id(7))
+
 
 
 if __name__ == '__main__':
