@@ -13,6 +13,18 @@ def align_genome(g1, g2):
     return a1, a2
 
 
+def evolve(population):
+    # if did improve during last 15
+    # breed top 40%
+    # copy champion of each species with > 5 genes
+    # 0.1% chance to mate with other species
+    # 80% offspring mutation
+    # 90% chance update weight & 10% to reset
+    # 0.03 chance of new node for small population
+    # 0.05 to add new link or 0.3 if population is big
+    pass
+
+
 def crossover(a1, a2):
     if len(a1) != len(a2):
         raise Exception('inputs not the same length')
