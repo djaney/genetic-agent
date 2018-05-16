@@ -34,16 +34,18 @@ def calculate_excess_disjoint(g1, g2):
 
 
 def calculate_average_weights(gene):
-    bias_average = reduce(lambda y, n: n.bias + y, gene.nodes) / len(gene.nodes)
-    weight_average = reduce(lambda y, n: n.weight + y, gene.connections) / len(gene.connections)
-
-    return (bias_average + weight_average) / 2
+    return np.mean([n.bias for n in gene.nodes] + [c.weight for c in gene.connections])
 
 
-def species_distance(g1, g2, population_count, c1=1, c2=1, c3=1):
+def species_distance(g1, g2, c1=1.0, c2=1.0, c3=3.0):
     excess, disjoint = calculate_excess_disjoint(g1, g2)
-    average_weights = (calculate_average_weights(g1) + calculate_average_weights(g2)) / 2
-    return (c1 * excess / population_count) + (c2 * disjoint / population_count) + (c3 + average_weights)
+    average_weights = np.mean([calculate_average_weights(g1) + calculate_average_weights(g2)])
+    g1_count = len(g1.connections)
+    g2_count = len(g2.connections)
+    max_genome_count = np.max([g1_count, g2_count])
+    max_genome_count = 1 if max_genome_count < 20 else max_genome_count
+    dist = (c1 * excess / max_genome_count) + (c2 * disjoint / max_genome_count) + (c3 * average_weights)
+    return dist
 
 
 def evolve(population):
@@ -90,13 +92,44 @@ def crossover(a1, a2):
     return child_genome
 
 
+def speciate(population, existing_species, c1, c2, c3, species_distance_threshold):
+    new_species = {}
+    for i, g in enumerate(population):
+        added = False
+        for species in list(existing_species.keys()):
+            dist = species_distance(g, existing_species[species][0], c1, c2, c3)
+            if species_distance_threshold >= dist:
+                new_species[species] = new_species.get(species, [])
+                new_species[species].append(g)
+                added = True
+                break
+
+        for species in list(new_species.keys()):
+            dist = species_distance(g, new_species[species][0], c1, c2, c3)
+            if species_distance_threshold >= dist:
+                new_species[species] = new_species.get(species, [])
+                new_species[species].append(g)
+                added = True
+                break
+
+        if not added:
+            name = 's' + str(len(new_species.keys()))
+            new_species[name] = new_species.get(name, [])
+            new_species[name].append(g)
+    return new_species
+
+
 class Population:
-    def __init__(self, size, inputs, outputs):
-        self.population = []
+    def __init__(self, size, inputs, outputs, c1=1.0, c2=1.0, c3=3.0, species_distance_threshold=4.0):
         self.node_innovation = inputs + outputs + 1
         self.conn_innovation = 1
+        self.population = {}
+        population = []
         for _ in range(size):
-            self.population.append(Genome(inputs, outputs))
+            population.append(Genome(inputs, outputs))
+
+        self.population = speciate(population, self.population, c1=c1, c2=c2, c3=c3,
+                                   species_distance_threshold=species_distance_threshold)
 
 
 class Genome:

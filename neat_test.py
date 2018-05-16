@@ -1,11 +1,11 @@
 import unittest
-from neat import Node, Genome, Population, align_genome, crossover, calculate_excess_disjoint
+from neat import Node, Genome, Population, align_genome, crossover, calculate_excess_disjoint, species_distance
 
 
 class TestPopulationMethods(unittest.TestCase):
     def test_init(self):
         p = Population(10, 3, 1)
-        self.assertEqual(10, len(p.population))
+        self.assertEqual(10, len(p.population.get('s0')))
         self.assertEqual(5, p.node_innovation)
         self.assertEqual(1, p.conn_innovation)
 
@@ -33,9 +33,8 @@ class TestPopulationMethods(unittest.TestCase):
         g2.connect_nodes_by_id(3, 5, 9)
         g2.connect_nodes_by_id(1, 6, 10)
 
-        p = Population(2, 3, 1)
-        p.population[0] = g1
-        p.population[1] = g2
+        # p = Population(2, 3, 1)
+        # p.population['s0'] = [g1, g2]
 
         a1, a2 = align_genome(g1, g2)
 
@@ -108,7 +107,7 @@ class TestPopulationMethods(unittest.TestCase):
         self.assertEqual(10, g3.select_connection_by_innovation(10).get_innovation())
 
         self.assertEqual((2, 3), calculate_excess_disjoint(g1, g2))
-
+        self.assertEqual(5, species_distance(g1, g2))
 
 
 class TestNodeMethods(unittest.TestCase):
