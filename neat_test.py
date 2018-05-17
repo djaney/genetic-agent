@@ -111,7 +111,12 @@ class TestPopulationMethods(unittest.TestCase):
 
     def test_evolution(self):
         p = Population(10, 3, 1)
-        evolve(p.population.get('s0'), 2)
+        all = []
+        for k, v in p.population.items():
+            if k != 's0':
+                all = all + v
+            pass
+        evolve(p.population.get('s0'), all, 2)
 
 
 class TestNodeMethods(unittest.TestCase):

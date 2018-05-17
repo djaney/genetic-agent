@@ -48,30 +48,34 @@ def species_distance(g1, g2, c1=1.0, c2=1.0, c3=3.0):
     return dist
 
 
-def evolve(population, generation, elite=0.4, champ_threshold=5, history_check=15, mutation=0.8, weight_update=0.9, new_node=0.03, new_link=0.05):
-    population_size = len(population)
+def evolve(pool, other_species, generation, elite_size=0.4, champ_threshold=5, history_check=15, mutation=0.8,
+           weight_update=0.9, new_node=0.03, new_link=0.05, cross_breed=0.001):
+    population_size = len(pool)
     new_population = []
-    max_score = np.max([g.score for g in population])
 
     # if did improve during last 15
-    did_improved = False
-    last_hist_list = [g.score_history[-history_check] for g in population if len(g.score_history) >= history_check]
-    last_score = np.max([g.score for g in population])
+    last_hist_list = [g.score_history[-history_check] for g in pool if len(g.score_history) >= history_check]
+    last_score = np.max([g.score for g in pool])
     last_hist_mean = np.mean(last_hist_list) if len(last_hist_list) > 0 else None
     did_improved = last_hist_mean is None or last_hist_mean < last_score
     if did_improved:
         # breed top 40%
-        population = sorted(population, key=lambda x: x.score, reverse=True)
-        elite = population[:math.floor(population_size * elite)]
-        new_population = new_population + breed(elite, generation, mutation=mutation, weight_update=weight_update, new_node=new_node, new_link=new_link)
-        # copy champion of each species with > 5 genes
+        pool = sorted(pool, key=lambda x: x.score, reverse=True)
+        elite = pool[:math.floor(population_size * elite_size)]
+        new_population = new_population + breed(elite, generation, mutation=mutation, weight_update=weight_update,
+                                                new_node=new_node, new_link=new_link)
+        # copy champion of each species with minimum size
         if population_size > champ_threshold:
-            new_population.append(population[0])
-        new_population = new_population + population[population_size-len(new_population):]
-        # 0.1% chance to mate with other species TODO
+            new_population.append(pool[0])
+
+        # chance to mate with other species
+        if random.random() < cross_breed:
+            new_population.append(breed(random.choice(elite), random.choice(other_species)))
+
+        new_population = new_population + pool[population_size - len(new_population):]
 
     else:
-        new_population = population
+        new_population = pool
 
     return new_population
 
@@ -92,6 +96,7 @@ def breed(population, generation, mutation, weight_update, new_node, new_link):
         pass
 
     return new_population
+
 
 def crossover(a1, a2):
     if len(a1) != len(a2):
