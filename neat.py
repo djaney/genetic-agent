@@ -299,6 +299,10 @@ class Genome:
 
         return connection
 
+    def get_input_nodes(self):
+        sorted(self.nodes, key=lambda n: n.get_innovation())
+        return [n for n in self.nodes if n.get_type() == Node.TYPE_INPUT]
+
 
 class Node:
     TYPE_INPUT = 1

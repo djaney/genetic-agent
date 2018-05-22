@@ -240,6 +240,11 @@ class TestGenomeMethods(unittest.TestCase):
         self.assertIsNotNone(g.select_node_by_id(6))
         self.assertRaises(Exception, lambda: g.select_node_by_id(7))
 
+    def test_get_input_nodes(self):
+        g = Genome(3, 1)
+
+        self.assertEqual([1, 2, 3], [g.get_innovation() for g in g.get_input_nodes()])
+
 
 if __name__ == '__main__':
     unittest.main()
