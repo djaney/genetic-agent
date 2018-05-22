@@ -303,6 +303,10 @@ class Genome:
         sorted(self.nodes, key=lambda n: n.get_innovation())
         return [n for n in self.nodes if n.get_type() == Node.TYPE_INPUT]
 
+    def get_output_nodes(self):
+        sorted(self.nodes, key=lambda n: n.get_innovation())
+        return [n for n in self.nodes if n.get_type() == Node.TYPE_OUTPUT]
+
 
 class Node:
     TYPE_INPUT = 1
@@ -376,3 +380,30 @@ class Connections:
 
     def get_innovation(self):
         return self.innovation
+
+
+class Printer:
+    def __init__(self, genome):
+        self.genome = genome
+        self.finished_nodes = []
+
+    def print(self):
+        self.iterate_layer(self.genome.get_input_nodes())
+        self.iterate_layer(self.genome.get_output_nodes())
+        pass
+
+    def iterate_layer(self, nodes):
+        self.print_layer(nodes)
+        next_nodes = []
+        for n in nodes:
+            for n2 in n.get_next_nodes():
+                if n2 not in self.finished_nodes and n2.get_type() != Node.TYPE_OUTPUT:
+                    self.finished_nodes.append(n2)
+                    next_nodes.append(n2)
+
+        if next_nodes:
+            self.iterate_layer(next_nodes)
+
+    @staticmethod
+    def print_layer(nodes):
+        print('    '.join(['('+str(n.get_innovation())+')' for n in nodes]))
