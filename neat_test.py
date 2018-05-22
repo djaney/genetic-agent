@@ -128,6 +128,11 @@ class TestNodeMethods(unittest.TestCase):
 
         self.assertEqual(2, n1.get_next_connections()[0].out_node.get_innovation())
 
+    def test_get_next_nodes(self):
+        g = Genome(1, 1)
+        g.create_node_between(1, 2, 3, 1)
+        self.assertEqual([3], [n.get_innovation() for n in g.select_node_by_id(1).get_next_nodes()])
+
 
 class TestConnectionMethods(unittest.TestCase):
 
@@ -234,7 +239,6 @@ class TestGenomeMethods(unittest.TestCase):
         g.create_node_between(3, 4, 6, 7)
         self.assertIsNotNone(g.select_node_by_id(6))
         self.assertRaises(Exception, lambda: g.select_node_by_id(7))
-
 
 
 if __name__ == '__main__':

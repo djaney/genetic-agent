@@ -350,6 +350,12 @@ class Node:
                 result = True
         return result
 
+    def get_next_nodes(self):
+        nodes = []
+        for c in self.get_next_connections():
+            nodes.append(c.get_next_node())
+        return nodes
+
 
 class Connections:
     def __init__(self, innovation):
