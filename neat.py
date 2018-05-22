@@ -1,7 +1,7 @@
 import numpy as np
 import math
 import random
-
+import matplotlib.pyplot as plt
 
 def align_genome(g1, g2):
     max_innovation = np.max([g1.max_connection_innovation(), g2.max_connection_innovation()])
@@ -383,17 +383,23 @@ class Connections:
 
 
 class Printer:
+
     def __init__(self, genome):
         self.genome = genome
         self.finished_nodes = []
+        self.layer = 0
+        self.printed_nodes = {}
 
     def print(self):
         self.iterate_layer(self.genome.get_input_nodes())
         self.iterate_layer(self.genome.get_output_nodes())
-        pass
+        self.print_lines(self.genome)
+        plt.show()
 
     def iterate_layer(self, nodes):
-        self.print_layer(nodes)
+        x = self.printed_nodes
+        y = self.print_layer(nodes, layer=self.layer)
+        self.printed_nodes = {**x, **y}
         next_nodes = []
         for n in nodes:
             for n2 in n.get_next_nodes():
@@ -402,8 +408,21 @@ class Printer:
                     next_nodes.append(n2)
 
         if next_nodes:
+            self.layer = self.layer + 1
             self.iterate_layer(next_nodes)
 
     @staticmethod
-    def print_layer(nodes):
-        print('    '.join(['('+str(n.get_innovation())+')' for n in nodes]))
+    def print_layer(nodes, layer=0):
+        x = []
+        y = []
+        printed = {}
+        for k, n in enumerate(nodes):
+            x.append(k)
+            y.append(layer)
+            printed[n.get_innovation()] = {'x': k, 'y': layer}
+        plt.plot(x, y, 'ro')
+        return printed
+
+    @staticmethod
+    def print_lines(genome):
+        print(genome.connections)
