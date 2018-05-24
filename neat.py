@@ -3,6 +3,7 @@ import math
 import random
 import matplotlib.pyplot as plt
 
+
 def align_genome(g1, g2):
     max_innovation = np.max([g1.max_connection_innovation(), g2.max_connection_innovation()])
     a1 = []
@@ -383,18 +384,23 @@ class Connections:
 
 
 class Printer:
+    WIDTH = 5
 
     def __init__(self, genome):
         self.genome = genome
         self.finished_nodes = []
         self.layer = 0
         self.printed_nodes = {}
+        fig, ax = plt.subplots(1)
+        self.ax = ax
+        self.scatter_x = []
+        self.scatter_y = []
 
     def print(self):
         self.iterate_layer(self.genome.get_input_nodes())
         self.iterate_layer(self.genome.get_output_nodes())
-        self.print_lines(self.genome)
-        plt.show()
+        self.plot(self.genome)
+
 
     def iterate_layer(self, nodes):
         x = self.printed_nodes
@@ -407,22 +413,41 @@ class Printer:
                     self.finished_nodes.append(n2)
                     next_nodes.append(n2)
 
+        self.layer = self.layer + 1
         if next_nodes:
-            self.layer = self.layer + 1
             self.iterate_layer(next_nodes)
 
-    @staticmethod
-    def print_layer(nodes, layer=0):
-        x = []
-        y = []
+    def print_layer(self, nodes, layer=0):
         printed = {}
+
+        node_count = len(nodes)
+        distance = self.WIDTH / (node_count + 1)
+
         for k, n in enumerate(nodes):
-            x.append(k)
-            y.append(layer)
-            printed[n.get_innovation()] = {'x': k, 'y': layer}
-        plt.plot(x, y, 'ro')
+            x = distance + (k * distance)
+            y = layer
+            self.scatter_x.append(x)
+            self.scatter_y.append(y)
+            printed[n.get_innovation()] = (x, y)
         return printed
 
-    @staticmethod
-    def print_lines(genome):
-        print(genome.connections)
+    def plot(self, genome):
+        # print connections
+        for c in genome.connections:
+            prev_innovation = c.get_prev_node().get_innovation()
+            next_innovation = c.get_next_node().get_innovation()
+            from_x, from_y = self.printed_nodes.get(prev_innovation)
+            to_x, to_y = self.printed_nodes.get(next_innovation)
+            self.ax.arrow(from_x, from_y, to_x - from_x, to_y - from_y, head_width=0.03, head_length=0.1, fc='k',
+                          ec='k',
+                          length_includes_head=True)
+
+        # print dots
+        self.ax.scatter(self.scatter_x, self.scatter_y, s=500)
+
+        # hide axis ticks
+        self.ax.set_yticklabels([])
+        self.ax.set_xticklabels([])
+
+        # show graph
+        plt.show()
