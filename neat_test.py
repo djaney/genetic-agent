@@ -1,4 +1,5 @@
 import unittest
+import random
 from neat import Node, Genome, Population, align_genome, crossover, calculate_excess_disjoint, species_distance, evolve, \
     Printer
 
@@ -251,6 +252,17 @@ class TestGenomeMethods(unittest.TestCase):
 
         self.assertEqual([4], [g.get_innovation() for g in g.get_output_nodes()])
 
+    def test_run(self):
+        g = Genome(3, 1, initializer=lambda: random.random())
+        g.connect_nodes_by_id(1, 4, 1)
+        g.connect_nodes_by_id(2, 4, 2)
+        g.connect_nodes_by_id(3, 4, 3)
+        g.create_node_between(2, 4, 5, 4)
+        g.connect_nodes_by_id(1, 5, 6)
+        g.create_node_between(3, 4, 7, 5)
+
+        output = g.run([1,1,1])
+        print(output)
 
 class TestPrinterMethods(unittest.TestCase):
     def test_print(self):
@@ -260,9 +272,10 @@ class TestPrinterMethods(unittest.TestCase):
         g.connect_nodes_by_id(3, 4, 3)
         g.create_node_between(2, 4, 5, 4)
         g.connect_nodes_by_id(1, 5, 6)
+        g.create_node_between(3, 4, 7, 5)
 
         printer = Printer(g)
-        #printer.print()
+        printer.print()
 
 
 if __name__ == '__main__':

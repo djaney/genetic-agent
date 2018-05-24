@@ -2,6 +2,7 @@ import numpy as np
 import math
 import random
 import matplotlib.pyplot as plt
+from functools import reduce
 
 
 def align_genome(g1, g2):
@@ -172,12 +173,13 @@ class Population:
 
 
 class Genome:
-    def __init__(self, input_count, output_count):
+    def __init__(self, input_count, output_count, initializer=None):
         self.nodes = []
         self.connections = []
         self.score_history = []
         self.score = 0
         self.generation = 1
+        self.initializer = initializer
 
         innovation = 1
         for _ in range(input_count):
@@ -193,7 +195,7 @@ class Genome:
         self.score = score
 
     def create_node(self, node_type, innovation):
-        new_node = Node(innovation, node_type)
+        new_node = Node(innovation, node_type, initializer=self.initializer)
         self.nodes.append(new_node)
         return new_node
 
@@ -255,7 +257,7 @@ class Genome:
 
     def connect_nodes(self, first_node, second_node, conn_innovation):
         # connect node
-        self.connections.append(first_node.connect_to(second_node, conn_innovation))
+        self.connections.append(first_node.connect_to(second_node, conn_innovation, initializer=self.initializer))
 
     def connect_nodes_by_id(self, first_id, second_id, conn_innovation):
         first_node = self.select_node_by_id(first_id)
@@ -308,18 +310,78 @@ class Genome:
         sorted(self.nodes, key=lambda n: n.get_innovation())
         return [n for n in self.nodes if n.get_type() == Node.TYPE_OUTPUT]
 
+    def reset_values(self):
+        for n in self.nodes:
+            n.reset_value()
+
+    def evaluate_layer(self, nodes):
+        # calculate values for each nodes
+        for n in nodes:
+            value = 0
+            # get each connection
+            for c in n.get_prev_connections():
+                # get node behind that connection
+                if c.get_prev_node().get_value() is not None:
+                    # value is sum if prev node value * weight
+                    value = value + c.get_prev_node().get_value() * c.get_weight()
+            # then add bias
+            value = value + n.get_bias()
+            n.set_value(value)
+
+        # evaluate next
+        for n in nodes:
+            next_nodes = n.get_next_nodes()
+            if len(next_nodes) > 0:
+                self.evaluate_layer(n.get_next_nodes())
+
+    def run(self, input):
+        self.reset_values()
+        values = {}
+        input_nodes = self.get_input_nodes()
+
+        if len(input) != len(input_nodes):
+            raise Exception("input count must be the same as number of input nodes")
+
+        # evaluate continuously while there are nodes without value
+        while reduce(lambda a, b: a + (0 if b.get_value() is not None else 1), self.nodes, 0) > 0:
+            # set value if inputs
+            for k, n in enumerate(input_nodes):
+                n.set_value(input[k])
+            self.evaluate_layer(input_nodes)
+
+            return [n.get_value() for n in self.get_output_nodes()]
+
 
 class Node:
     TYPE_INPUT = 1
     TYPE_OUTPUT = 2
     TYPE_HIDDEN = 3
 
-    def __init__(self, innovation, node_type):
+    def __init__(self, innovation, node_type, initializer=None):
         self.innovation = innovation
         self.node_type = node_type
         self.bias = 0
         self.in_connections = []
         self.out_connections = []
+        self.value = None
+
+        if initializer is not None:
+            self.bias = initializer()
+
+    def reset_value(self):
+        self.value = None
+
+    def set_value(self, value):
+        self.value = value
+
+    def get_value(self):
+        return self.value
+
+    def set_bias(self, bias):
+        self.bias = bias
+
+    def get_bias(self):
+        return self.bias
 
     def get_innovation(self):
         return self.innovation
@@ -327,9 +389,9 @@ class Node:
     def get_type(self):
         return self.node_type
 
-    def connect_to(self, next_node, conn_innovation):
+    def connect_to(self, next_node, conn_innovation, initializer=None):
         # create connection
-        connection = Connections(conn_innovation)
+        connection = Connections(conn_innovation, initializer=initializer)
         # attach to self
         self.out_connections.append(connection)
         # attach to next
@@ -367,11 +429,13 @@ class Node:
 
 
 class Connections:
-    def __init__(self, innovation):
+    def __init__(self, innovation, initializer=None):
         self.in_node = None
         self.out_node = None
         self.innovation = innovation
         self.weight = 0
+        if initializer is not None:
+            self.weight = initializer()
 
     def get_next_node(self):
         return self.out_node
@@ -381,6 +445,9 @@ class Connections:
 
     def get_innovation(self):
         return self.innovation
+
+    def get_weight(self):
+        return self.weight
 
 
 class Printer:
@@ -400,7 +467,6 @@ class Printer:
         self.iterate_layer(self.genome.get_input_nodes())
         self.iterate_layer(self.genome.get_output_nodes())
         self.plot(self.genome)
-
 
     def iterate_layer(self, nodes):
         x = self.printed_nodes
