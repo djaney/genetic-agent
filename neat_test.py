@@ -259,7 +259,7 @@ class TestGenomeMethods(unittest.TestCase):
         g.connect_nodes_by_id(3, 4, 3)
         g.create_node_between(2, 4, 5, 4)
         g.connect_nodes_by_id(1, 5, 6)
-        g.create_node_between(3, 4, 7, 5)
+        g.connect_nodes_by_id(5, 5, 7)
 
         output = g.run([1,1,1])
         print(output)
@@ -272,7 +272,7 @@ class TestPrinterMethods(unittest.TestCase):
         g.connect_nodes_by_id(3, 4, 3)
         g.create_node_between(2, 4, 5, 4)
         g.connect_nodes_by_id(1, 5, 6)
-        g.create_node_between(3, 4, 7, 5)
+
 
         printer = Printer(g)
         printer.print()

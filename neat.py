@@ -314,6 +314,13 @@ class Genome:
         for n in self.nodes:
             n.reset_value()
 
+    def reset_activated(self):
+        for n in self.nodes:
+            n.reset_activated()
+
+        for c in self.connections:
+            c.reset_activated()
+
     def evaluate_layer(self, nodes):
         # calculate values for each nodes
         for n in nodes:
@@ -324,32 +331,46 @@ class Genome:
                 if c.get_prev_node().get_value() is not None:
                     # value is sum if prev node value * weight
                     value = value + c.get_prev_node().get_value() * c.get_weight()
+                    c.set_activated(True)
             # then add bias
             value = value + n.get_bias()
+            n.set_activated(True)
             n.set_value(value)
 
         # evaluate next
         for n in nodes:
             next_nodes = n.get_next_nodes()
+            next_nodes = [n for n in next_nodes if not n.get_activated()]
             if len(next_nodes) > 0:
                 self.evaluate_layer(n.get_next_nodes())
 
+    def is_nodes_activated(self):
+        return reduce(lambda a, b: a + (0 if b.get_activated() else 1), self.nodes, 0) == 0
+
+    def is_connections_activated(self):
+        return reduce(lambda a, b: a + (0 if b.get_activated() else 1), self.connections, 0) == 0
+
+    def is_all_activated(self):
+        return self.is_nodes_activated() and self.is_connections_activated()
+
     def run(self, input):
         self.reset_values()
-        values = {}
         input_nodes = self.get_input_nodes()
 
         if len(input) != len(input_nodes):
             raise Exception("input count must be the same as number of input nodes")
 
         # evaluate continuously while there are nodes without value
-        while reduce(lambda a, b: a + (0 if b.get_value() is not None else 1), self.nodes, 0) > 0:
+        while True:
+            print('pass')
+            self.reset_activated()
             # set value if inputs
             for k, n in enumerate(input_nodes):
                 n.set_value(input[k])
             self.evaluate_layer(input_nodes)
-
-            return [n.get_value() for n in self.get_output_nodes()]
+            if self.is_all_activated():
+                break
+        return [n.get_value() for n in self.get_output_nodes()]
 
 
 class Node:
@@ -364,6 +385,7 @@ class Node:
         self.in_connections = []
         self.out_connections = []
         self.value = None
+        self.activated = None
 
         if initializer is not None:
             self.bias = initializer()
@@ -371,11 +393,20 @@ class Node:
     def reset_value(self):
         self.value = None
 
+    def reset_activated(self):
+        self.value = None
+
     def set_value(self, value):
         self.value = value
 
     def get_value(self):
         return self.value
+
+    def set_activated(self, activated):
+        self.activated = activated
+
+    def get_activated(self):
+        return self.activated
 
     def set_bias(self, bias):
         self.bias = bias
@@ -434,8 +465,18 @@ class Connections:
         self.out_node = None
         self.innovation = innovation
         self.weight = 0
+        self.activated = False
         if initializer is not None:
             self.weight = initializer()
+
+    def reset_activated(self):
+        self.activated = False
+
+    def set_activated(self, activated):
+        self.activated = activated
+
+    def get_activated(self):
+        return self.activated
 
     def get_next_node(self):
         return self.out_node
