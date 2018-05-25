@@ -314,6 +314,10 @@ class Genome:
         for n in self.nodes:
             n.reset_value()
 
+    def reset_skipped(self):
+        for c in self.connections:
+            c.reset_skipped()
+
     def reset_activated(self):
         for n in self.nodes:
             n.reset_activated()
@@ -331,7 +335,9 @@ class Genome:
                 if c.get_prev_node().get_value() is not None:
                     # value is sum if prev node value * weight
                     value = value + c.get_prev_node().get_value() * c.get_weight()
-                    c.set_activated(True)
+                else:
+                    c.set_skipped(True)
+                c.set_activated(True)
             # then add bias
             value = value + n.get_bias()
             n.set_activated(True)
@@ -339,8 +345,9 @@ class Genome:
 
         # evaluate next
         for n in nodes:
-            next_nodes = n.get_next_nodes()
-            next_nodes = [n for n in next_nodes if not n.get_activated()]
+            next_connections = n.get_next_connections()
+            next_nodes = [c.get_next_node() for c in next_connections if not c.get_next_node().get_activated()
+                          or not c.get_activated()]
             if len(next_nodes) > 0:
                 self.evaluate_layer(n.get_next_nodes())
 
@@ -353,8 +360,12 @@ class Genome:
     def is_all_activated(self):
         return self.is_nodes_activated() and self.is_connections_activated()
 
+    def no_skipped(self):
+        return reduce(lambda a, b: a + (1 if b.get_skipped() else 0), self.connections, 0) == 0
+
     def run(self, input):
         self.reset_values()
+        self.reset_activated()
         input_nodes = self.get_input_nodes()
 
         if len(input) != len(input_nodes):
@@ -362,13 +373,12 @@ class Genome:
 
         # evaluate continuously while there are nodes without value
         while True:
-            print('pass')
-            self.reset_activated()
+            self.reset_skipped()
             # set value if inputs
             for k, n in enumerate(input_nodes):
                 n.set_value(input[k])
             self.evaluate_layer(input_nodes)
-            if self.is_all_activated():
+            if self.no_skipped():
                 break
         return [n.get_value() for n in self.get_output_nodes()]
 
@@ -466,11 +476,21 @@ class Connections:
         self.innovation = innovation
         self.weight = 0
         self.activated = False
+        self.skipped = False
         if initializer is not None:
             self.weight = initializer()
 
     def reset_activated(self):
         self.activated = False
+
+    def reset_skipped(self):
+        self.skipped = False
+
+    def set_skipped(self, skipped):
+        self.skipped = skipped
+
+    def get_skipped(self):
+        return self.skipped
 
     def set_activated(self, activated):
         self.activated = activated
