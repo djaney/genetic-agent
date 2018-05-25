@@ -120,6 +120,20 @@ class TestPopulationMethods(unittest.TestCase):
             pass
         evolve(p.population.get('s0'), all, 2)
 
+    def test_status(self):
+        p = Population(10, 3, 1)
+        print(p.get_status())
+
+    def test_flow(self):
+        p = Population(10, 3, 1)
+        for _ in range(100):
+            status = p.get_status()
+            for s in status.keys():
+                for i in range(status.get(s, 0)):
+                    print(p.run(s, i, [1, 2, 3]))
+                    p.set_score(s, i, 1)
+            p.evolve()
+
 
 class TestNodeMethods(unittest.TestCase):
 

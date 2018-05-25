@@ -71,7 +71,7 @@ def evolve(pool, other_species, generation, elite_size=0.4, champ_threshold=5, h
             new_population.append(pool[0])
 
         # chance to mate with other species
-        if random.random() < cross_breed:
+        if len(other_species) > 0 and random.random() < cross_breed:
             new_population.append(breed(random.choice(elite), random.choice(other_species)))
 
         new_population = new_population + pool[population_size - len(new_population):]
@@ -163,6 +163,7 @@ class Population:
     def __init__(self, size, inputs, outputs, c1=1.0, c2=1.0, c3=3.0, species_distance_threshold=4.0):
         self.node_innovation = inputs + outputs + 1
         self.conn_innovation = 1
+        self.generation = 1
         self.population = {}
         population = []
         for _ in range(size):
@@ -170,6 +171,34 @@ class Population:
 
         self.population = speciate(population, self.population, c1=c1, c2=c2, c3=c3,
                                    species_distance_threshold=species_distance_threshold)
+
+    def get_population(self):
+        return self.population
+
+    def get_status(self):
+        status = {}
+        for species in self.population.keys():
+            status[species] = len(self.population.get(species,[]))
+        return status
+
+    def set_score(self, s, i, score):
+        self.population.get(s)[i].set_score(score)
+
+    def run(self, s, i, input_list):
+        return self.population.get(s)[i].run(input_list)
+
+    def evolve(self):
+        other_population = []
+        for species in self.get_population().keys():
+            for k, v in self.get_population().items():
+                if k != species:
+                    other_population = other_population + v
+                pass
+            population_to_evolve = self.population.get(species)
+            new_population = evolve(population_to_evolve, other_population, self.generation)
+            self.get_population()[species] = new_population
+
+        self.generation = self.generation + 1
 
 
 class Genome:
@@ -363,24 +392,24 @@ class Genome:
     def no_skipped(self):
         return reduce(lambda a, b: a + (1 if b.get_skipped() else 0), self.connections, 0) == 0
 
-    def run(self, input):
+    def run(self, input_list):
         self.reset_values()
         self.reset_activated()
         input_nodes = self.get_input_nodes()
 
-        if len(input) != len(input_nodes):
-            raise Exception("input count must be the same as number of input nodes")
+        if len(input_list) != len(input_nodes):
+            raise Exception("input count must be the same as number of input nodes {} != {}".format(len(input_list), len(input_nodes)))
 
         # evaluate continuously while there are nodes without value
         while True:
             self.reset_skipped()
             # set value if inputs
             for k, n in enumerate(input_nodes):
-                n.set_value(input[k])
+                n.set_value(input_list[k])
             self.evaluate_layer(input_nodes)
             if self.no_skipped():
                 break
-        return [n.get_value() for n in self.get_output_nodes()]
+        return [(n.get_value() if n.get_value() else 0) for n in self.get_output_nodes()]
 
 
 class Node:
