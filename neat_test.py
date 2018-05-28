@@ -1,7 +1,7 @@
 import unittest
 import random
-from neat import Node, Genome, Population, align_genome, crossover, calculate_excess_disjoint, species_distance, evolve, \
-    Printer
+from neat import Node, Genome, Population, align_genome, crossover, calculate_excess_disjoint, \
+    species_distance, evolve, Printer
 
 
 class TestPopulationMethods(unittest.TestCase):
@@ -111,6 +111,14 @@ class TestPopulationMethods(unittest.TestCase):
         self.assertEqual((2, 3), calculate_excess_disjoint(g1, g2))
         self.assertEqual(5, species_distance(g1, g2))
 
+    def test_empty_crossover(self):
+        g1 = Genome(3, 1)
+        g2 = Genome(3, 1)
+        a1, a2 = align_genome(g1, g2)
+        c = crossover(a1, a2, g1.get_input_nodes(), g1.get_output_nodes())
+        self.assertGreaterEqual(4, len(c.nodes))
+
+
     def test_evolution(self):
         p = Population(10, 3, 1)
         all = []
@@ -130,7 +138,7 @@ class TestPopulationMethods(unittest.TestCase):
             status = p.get_status()
             for s in status.keys():
                 for i in range(status.get(s, 0)):
-                    print(p.run(s, i, [1, 2, 3]))
+                    p.run(s, i, [1, 2, 3])
                     p.set_score(s, i, 1)
             p.evolve()
 

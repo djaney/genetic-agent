@@ -88,7 +88,7 @@ def breed(population, generation, mutation, weight_update, new_node, new_link):
     for _ in range(initial_size):
         sample = random.sample(population, 2)
         a1, a2 = align_genome(sample[0], sample[1])
-        g = crossover(a1, a2)
+        g = crossover(a1, a2, sample[0].get_input_nodes(), sample[0].get_output_nodes())
         g.generation = generation
         new_population.append(g)
     # 80% offspring mutation
@@ -100,7 +100,7 @@ def breed(population, generation, mutation, weight_update, new_node, new_link):
     return new_population
 
 
-def crossover(a1, a2):
+def crossover(a1, a2, input_nodes, output_nodes):
     if len(a1) != len(a2):
         raise Exception('inputs not the same length')
 
@@ -120,6 +120,7 @@ def crossover(a1, a2):
             # disjoint
             pass
     child_genome = Genome(0, 0)
+
     for c in child_connections:
         prev_node = c.get_prev_node()
         next_node = c.get_next_node()
@@ -129,6 +130,15 @@ def crossover(a1, a2):
             child_genome.nodes.append(prev_node)
         if not child_genome.has_node_with_innovation(next_node.get_innovation()):
             child_genome.nodes.append(next_node)
+
+    for n in input_nodes:
+        if not child_genome.has_node_with_innovation(n.get_innovation()):
+            child_genome.nodes.append(n)
+
+    for n in output_nodes:
+        if not child_genome.has_node_with_innovation(n.get_innovation()):
+            child_genome.nodes.append(n)
+
     return child_genome
 
 
@@ -161,6 +171,13 @@ def speciate(population, existing_species, c1, c2, c3, species_distance_threshol
 
 class Population:
     def __init__(self, size, inputs, outputs, c1=1.0, c2=1.0, c3=3.0, species_distance_threshold=4.0):
+
+        self.c1 = c1
+        self.c2 = c2
+        self.c3 = c3
+        self.species_distance_threshold = species_distance_threshold
+
+
         self.node_innovation = inputs + outputs + 1
         self.conn_innovation = 1
         self.generation = 1
@@ -169,8 +186,8 @@ class Population:
         for _ in range(size):
             population.append(Genome(inputs, outputs))
 
-        self.population = speciate(population, self.population, c1=c1, c2=c2, c3=c3,
-                                   species_distance_threshold=species_distance_threshold)
+        self.population = speciate(population, self.population, c1=self.c1, c2=self.c2, c3=self.c3,
+                                   species_distance_threshold=self.species_distance_threshold)
 
     def get_population(self):
         return self.population
@@ -188,15 +205,18 @@ class Population:
         return self.population.get(s)[i].run(input_list)
 
     def evolve(self):
+        new_population = []
         other_population = []
         for species in self.get_population().keys():
             for k, v in self.get_population().items():
                 if k != species:
                     other_population = other_population + v
-                pass
+
             population_to_evolve = self.population.get(species)
-            new_population = evolve(population_to_evolve, other_population, self.generation)
-            self.get_population()[species] = new_population
+            new_population = new_population + evolve(population_to_evolve, other_population, self.generation)
+
+        self.population = speciate(new_population, self.population, c1=self.c1, c2=self.c2, c3=self.c3,
+                                   species_distance_threshold=self.species_distance_threshold)
 
         self.generation = self.generation + 1
 
