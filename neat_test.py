@@ -117,18 +117,19 @@ class TestPopulationMethods(unittest.TestCase):
         c = Population.crossover(a1, a2, g1.get_input_nodes(), g1.get_output_nodes())
         self.assertGreaterEqual(4, len(c.nodes))
 
-
     def test_evolution(self):
         p = Population(10, 3, 1)
-        all = []
+        entire_population = []
         for k, v in p.population.items():
             if k != 's0':
-                all = all + v
+                entire_population = entire_population + v
             pass
-        Population.do_evolve(p.population.get('s0'), all, 2)
+        Population.do_evolve(p.population.get('s0'), entire_population, 2)
 
     def test_status(self):
         p = Population(10, 3, 1)
+        status = p.get_status()
+        self.assertEquals({'s0': 10}, status)
 
 
 class TestNodeMethods(unittest.TestCase):
