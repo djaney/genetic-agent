@@ -124,12 +124,12 @@ class TestPopulationMethods(unittest.TestCase):
             if k != 's0':
                 entire_population = entire_population + v
             pass
-        Population.do_evolve(p.population.get('s0'), entire_population, 2)
+        p.do_evolve(p.population.get('s0'), entire_population, 2)
 
     def test_status(self):
         p = Population(10, 3, 1)
         status = p.get_status()
-        self.assertEquals({'s0': 10}, status)
+        self.assertEqual({'s0': 10}, status)
 
 
 class TestNodeMethods(unittest.TestCase):

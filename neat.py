@@ -123,8 +123,7 @@ class Population:
                 new_species[name].append(g)
         return new_species
 
-    @staticmethod
-    def breed(population, generation, mutation, weight_update, new_node, new_link):
+    def breed(self, population, generation, mutation, weight_update, new_node, new_link):
         initial_size = len(population)
         new_population = []
         for _ in range(initial_size):
@@ -144,11 +143,12 @@ class Population:
 
             # chance to add new node
             if random.random() < new_node:
-                offspring.mutate_nodes()
+                self.node_innovation, self.conn_innovation = \
+                    offspring.mutate_nodes(self.node_innovation, self.conn_innovation)
 
             # chance to add new connection
             if random.random() < new_link:
-                offspring.mutate_connections()
+                self.conn_innovation = offspring.mutate_connections(self.conn_innovation)
 
         return new_population
 
@@ -185,8 +185,8 @@ class Population:
     def run(self, s, i, input_list):
         return self.population.get(s)[i].run(input_list)
 
-    @staticmethod
-    def do_evolve(pool, other_species, generation, elite_size=0.4, champ_threshold=5, history_check=15, mutation=0.8,
+    def do_evolve(self, pool, other_species, generation, elite_size=0.4, champ_threshold=5, history_check=15,
+                  mutation=0.8,
                   weight_update=0.9, new_node=0.03, new_link=0.05, cross_breed=0.001):
         population_size = len(pool)
         new_population = []
@@ -200,23 +200,25 @@ class Population:
             # breed top 40%
             pool = sorted(pool, key=lambda x: x.score, reverse=True)
             elite = pool[:math.floor(population_size * elite_size)]
-            new_population = new_population + Population.breed(elite, generation,
-                                                               mutation=mutation,
-                                                               weight_update=weight_update,
-                                                               new_node=new_node,
-                                                               new_link=new_link)
+            new_population = new_population + self.breed(elite, generation,
+                                                         mutation=mutation,
+                                                         weight_update=weight_update,
+                                                         new_node=new_node,
+                                                         new_link=new_link)
             # copy champion of each species with minimum size
             if population_size > champ_threshold:
                 new_population.append(pool[0])
 
             # chance to mate with other species
             if len(other_species) > 0 and random.random() < cross_breed:
-                cross_breed_offsprint = Population.breed(random.choice(elite), random.choice(other_species),
-                                                         mutation=mutation,
-                                                         weight_update=weight_update,
-                                                         new_node=new_node,
-                                                         new_link=new_link)
-                new_population.append(cross_breed_offsprint)
+                cross_pool = random.choice(elite) + random.choice(other_species)
+                cross_breed_offsprings = self.breed(cross_pool,
+                                                    generation=generation,
+                                                    mutation=mutation,
+                                                    weight_update=weight_update,
+                                                    new_node=new_node,
+                                                    new_link=new_link)
+                new_population = new_population + cross_breed_offsprings
 
             new_population = new_population + pool[population_size - len(new_population):]
 
@@ -357,11 +359,15 @@ class Genome:
 
         return False
 
-    def mutate_nodes(self):
-        pass  # TODO
+    def mutate_nodes(self, current_node_innovation, current_connection_innovation):
+        if len(self.connections) > 0:
+            pass  # TODO
 
-    def mutate_connections(self):
+        return current_node_innovation + 1, current_connection_innovation + 2
+
+    def mutate_connections(self, current_connection_innovation):
         pass  # TODO
+        return current_connection_innovation + 1
 
     def mutate_weights(self, update):
         # update else reset
