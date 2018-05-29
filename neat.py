@@ -61,9 +61,6 @@ class Population:
     def set_score(self, s, i, score):
         self.population.get(s)[i].set_score(score)
 
-    @staticmethod
-    def update_random_weight(genome, update=False):
-        pass
 
     @staticmethod
     def crossover(a1, a2, input_nodes, output_nodes):
@@ -144,14 +141,22 @@ class Population:
             g = Population.crossover(a1, a2, sample[0].get_input_nodes(), sample[0].get_output_nodes())
             g.generation = generation
             new_population.append(g)
-        # 80% offspring mutation
-        if random.random() < mutation:
-            # 90% chance update weight & 10% to reset TODO
-            do_update = random.random() < weight_update
-            Population.update_random_weight(random.choice(new_population), update=do_update)  # otherwise reset
 
-            # 0.03 chance of new node for small population TODO
-            pass
+        # for each offspring
+        for offspring in new_population:
+            # 80% offspring mutation
+            if random.random() < mutation:
+                # 90% chance update weight & 10% to reset TODO
+                do_update = random.random() < weight_update
+                offspring.mutate_weights(do_update)  # otherwise reset
+
+            # chance to add new node
+            if random.random() < new_node:
+                offspring.mutate_nodes()
+
+            # chance to add new connection
+            if random.random() < new_link:
+                offspring.mutate_connections()
 
         return new_population
 
@@ -356,10 +361,14 @@ class Genome:
         return False
 
     def mutate_nodes(self):
-        pass
+        pass  # TODO
 
     def mutate_connections(self):
-        pass
+        pass  # TODO
+
+    def mutate_weights(self, update):
+        # update else reset
+        pass  # TODO
 
     def select_connection_by_innovation(self, innovation, throw_not_found=True):
         connection = None
