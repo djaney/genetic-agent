@@ -19,9 +19,11 @@ def species_distance(g1, g2, c1=1.0, c2=1.0, c3=3.0):
     dist = (c1 * excess / max_genome_count) + (c2 * disjoint / max_genome_count) + (c3 * average_weights)
     return dist
 
+def random_initializer():
+    return random.random();
 
 class Population:
-    def __init__(self, size, inputs, outputs, c1=1.0, c2=1.0, c3=3.0, species_distance_threshold=4.0):
+    def __init__(self, size, inputs, outputs, c1=1.0, c2=1.0, c3=3.0, species_distance_threshold=4.0, initializer=None):
 
         self.c1 = c1
         self.c2 = c2
@@ -33,8 +35,12 @@ class Population:
         self.generation = 1
         self.population = {}
         population = []
+
+        if initializer is None:
+            initializer = random_initializer
+
         for _ in range(size):
-            population.append(Genome(inputs, outputs))
+            population.append(Genome(inputs, outputs, initializer=initializer))
 
         self.population = Population.speciate(population, self.population,
                                               c1=self.c1,

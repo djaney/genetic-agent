@@ -272,7 +272,8 @@ class TestGenomeMethods(unittest.TestCase):
         g.connect_nodes_by_id(1, 5, 6)
         g.connect_nodes_by_id(5, 5, 7)
 
-        g.run([1, 1, 1])
+        output = g.run([1, 1, 1])
+        self.assertNotEqual(0, output[0])
 
     def test_evolution(self):
         p = Population(10, 3, 1)
