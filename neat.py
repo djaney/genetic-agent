@@ -50,8 +50,8 @@ def species_distance(g1, g2, c1=1.0, c2=1.0, c3=3.0):
     return dist
 
 
-def evolve(pool, other_species, generation, elite_size=0.4, champ_threshold=5, history_check=15, mutation=0.8,
-           weight_update=0.9, new_node=0.03, new_link=0.05, cross_breed=0.001):
+def do_evolve(pool, other_species, generation, elite_size=0.4, champ_threshold=5, history_check=15, mutation=0.8,
+              weight_update=0.9, new_node=0.03, new_link=0.05, cross_breed=0.001):
     population_size = len(pool)
     new_population = []
 
@@ -82,6 +82,10 @@ def evolve(pool, other_species, generation, elite_size=0.4, champ_threshold=5, h
     return new_population
 
 
+def update_random_weight(genome, update=False):
+    pass
+
+
 def breed(population, generation, mutation, weight_update, new_node, new_link):
     initial_size = len(population)
     new_population = []
@@ -94,6 +98,9 @@ def breed(population, generation, mutation, weight_update, new_node, new_link):
     # 80% offspring mutation
     if random.random() < mutation:
         # 90% chance update weight & 10% to reset TODO
+        do_update = random.random() < weight_update
+        update_random_weight(random.choice(new_population), update=do_update)  # otherwise reset
+
         # 0.03 chance of new node for small population TODO
         pass
 
@@ -213,7 +220,7 @@ class Population:
                     other_population = other_population + v
 
             population_to_evolve = self.population.get(species)
-            new_population = new_population + evolve(population_to_evolve, other_population, self.generation)
+            new_population = new_population + do_evolve(population_to_evolve, other_population, self.generation)
 
         self.population = speciate(new_population, self.population, c1=self.c1, c2=self.c2, c3=self.c3,
                                    species_distance_threshold=self.species_distance_threshold)

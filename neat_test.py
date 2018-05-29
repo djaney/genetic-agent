@@ -1,7 +1,7 @@
 import unittest
 import random
 from neat import Node, Genome, Population, align_genome, crossover, calculate_excess_disjoint, \
-    species_distance, evolve, Printer
+    species_distance, do_evolve, Printer
 
 
 class TestPopulationMethods(unittest.TestCase):
@@ -92,7 +92,7 @@ class TestPopulationMethods(unittest.TestCase):
 
         a1, a2 = align_genome(g1, g2)
 
-        g3 = crossover(a1, a2)
+        g3 = crossover(a1, a2, g1.get_input_nodes(), g1.get_output_nodes())
 
         self.assertEqual(10, len(g3.connections))
         self.assertEqual(6, len(g3.nodes))
@@ -126,24 +126,10 @@ class TestPopulationMethods(unittest.TestCase):
             if k != 's0':
                 all = all + v
             pass
-        evolve(p.population.get('s0'), all, 2)
+        do_evolve(p.population.get('s0'), all, 2)
 
     def test_status(self):
         p = Population(10, 3, 1)
-        print(p.get_status())
-
-    def test_flow(self):
-        p = Population(10, 3, 1)
-        for _ in range(100):
-            status = p.get_status()
-            for s in status.keys():
-                output = []
-                for i in range(status.get(s, 0)):
-                    output.append(p.run(s, i, [1, 2, 3]))
-                    p.set_score(s, i, 1)
-                print(s, output)
-            p.evolve()
-
 
 class TestNodeMethods(unittest.TestCase):
 
@@ -288,6 +274,8 @@ class TestGenomeMethods(unittest.TestCase):
         output = g.run([1,1,1])
         print(output)
 
+
+@unittest.skip("Printing")
 class TestPrinterMethods(unittest.TestCase):
     def test_print(self):
         g = Genome(3, 1)
@@ -297,9 +285,23 @@ class TestPrinterMethods(unittest.TestCase):
         g.create_node_between(2, 4, 5, 4)
         g.connect_nodes_by_id(1, 5, 6)
 
-
         printer = Printer(g)
         printer.print()
+
+
+@unittest.skip("Functional")
+class TestFunctional(unittest.TestCase):
+    def test_flow(self):
+        p = Population(10, 3, 1)
+        for _ in range(100):
+            status = p.get_status()
+            for s in status.keys():
+                output = []
+                for i in range(status.get(s, 0)):
+                    output.append(p.run(s, i, [1, 2, 3]))
+                    p.set_score(s, i, 1)
+                print(s, output)
+            p.evolve()
 
 
 if __name__ == '__main__':
