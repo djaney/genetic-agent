@@ -303,7 +303,7 @@ class TestPrinterMethods(unittest.TestCase):
 class TestFunctional(unittest.TestCase):
     def test_flow(self):
         p = Population(10, 3, 1)
-        for _ in range(100):
+        for _ in range(500):
             status = p.get_status()
             for s in status.keys():
                 output = []

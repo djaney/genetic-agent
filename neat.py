@@ -99,8 +99,6 @@ class Population:
     @staticmethod
     def speciate(population, existing_species, c1, c2, c3, species_distance_threshold):
 
-        # TODO output is double the input, need to fix
-
         new_species = {}
         for i, g in enumerate(population):
             added = False
@@ -203,12 +201,15 @@ class Population:
         if did_improved:
             # breed top 40%
             pool = sorted(pool, key=lambda x: x.score, reverse=True)
-            elite = pool[:math.floor(population_size * elite_size)]
-            new_population = new_population + self.breed(elite, generation,
-                                                         mutation=mutation,
-                                                         weight_update=weight_update,
-                                                         new_node=new_node,
-                                                         new_link=new_link)
+            elite = pool[:math.ceil(population_size * elite_size)]
+
+            if len(elite) > 1:
+                new_population = new_population + self.breed(elite, generation,
+                                                             mutation=mutation,
+                                                             weight_update=weight_update,
+                                                             new_node=new_node,
+                                                             new_link=new_link)
+
             # copy champion of each species with minimum size
             if population_size > champ_threshold:
                 new_population.append(pool[0])
@@ -368,13 +369,23 @@ class Genome:
             selected_connection = random.choice(self.connections)
             prev_node = selected_connection.get_prev_node()
             next_node = selected_connection.get_next_node()
-            self.create_node_between(prev_node.get_innovation(), next_node.get_innovation(), current_node_innovation+1,
-                                     current_connection_innovation+1)
+            self.create_node_between(prev_node.get_innovation(), next_node.get_innovation(),
+                                     current_node_innovation + 1,
+                                     current_connection_innovation + 1)
 
         return current_node_innovation + 1, current_connection_innovation + 2
 
     def mutate_connections(self, current_connection_innovation):
-        pass  # TODO
+        node_from = random.choice([n for n in self.nodes if n.node_type != Node.TYPE_OUTPUT])
+        node_to_choices = [n for n in self.nodes if n.node_type != Node.TYPE_INPUT and
+                           not n.is_connected_to_prev_by_id(node_from.get_innovation())]
+
+        if len(node_to_choices) == 0:
+            return current_connection_innovation
+
+        node_to = random.choice(node_to_choices)
+        self.connect_nodes_by_id(node_from.get_innovation(), node_to.get_innovation(),
+                                 current_connection_innovation + 1)
         return current_connection_innovation + 1
 
     def mutate_weights(self, update):
@@ -657,9 +668,12 @@ class Printer:
             next_innovation = c.get_next_node().get_innovation()
             from_x, from_y = self.printed_nodes.get(prev_innovation)
             to_x, to_y = self.printed_nodes.get(next_innovation)
-            self.ax.arrow(from_x, from_y, to_x - from_x, to_y - from_y, head_width=0.03, head_length=0.1, fc='k',
-                          ec='k',
-                          length_includes_head=True)
+            if prev_innovation != next_innovation:
+                self.ax.arrow(from_x, from_y, to_x - from_x, to_y - from_y, head_width=0.03, head_length=0.1, fc='k',
+                              ec='k',
+                              length_includes_head=True)
+            else:
+                print("need to find a way to print self pointing arrow")
 
         # print dots
         self.ax.scatter(self.scatter_x, self.scatter_y, s=500)
