@@ -5,9 +5,6 @@ import matplotlib.pyplot as plt
 from functools import reduce
 
 
-
-
-
 def calculate_average_weights(gene):
     return np.mean([n.bias for n in gene.nodes] + [c.weight for c in gene.connections])
 
@@ -23,9 +20,6 @@ def species_distance(g1, g2, c1=1.0, c2=1.0, c3=3.0):
     return dist
 
 
-
-
-
 class Population:
     def __init__(self, size, inputs, outputs, c1=1.0, c2=1.0, c3=3.0, species_distance_threshold=4.0):
 
@@ -33,7 +27,6 @@ class Population:
         self.c2 = c2
         self.c3 = c3
         self.species_distance_threshold = species_distance_threshold
-
 
         self.node_innovation = inputs + outputs + 1
         self.conn_innovation = 1
@@ -55,12 +48,11 @@ class Population:
     def get_status(self):
         status = {}
         for species in self.population.keys():
-            status[species] = len(self.population.get(species,[]))
+            status[species] = len(self.population.get(species, []))
         return status
 
     def set_score(self, s, i, score):
         self.population.get(s)[i].set_score(score)
-
 
     @staticmethod
     def crossover(a1, a2, input_nodes, output_nodes):
@@ -146,7 +138,7 @@ class Population:
         for offspring in new_population:
             # 80% offspring mutation
             if random.random() < mutation:
-                # 90% chance update weight & 10% to reset TODO
+                # 90% chance update weight & 10% to reset
                 do_update = random.random() < weight_update
                 offspring.mutate_weights(do_update)  # otherwise reset
 
@@ -219,7 +211,12 @@ class Population:
 
             # chance to mate with other species
             if len(other_species) > 0 and random.random() < cross_breed:
-                new_population.append(Population.breed(random.choice(elite), random.choice(other_species)))
+                cross_breed_offsprint = Population.breed(random.choice(elite), random.choice(other_species),
+                                                         mutation=mutation,
+                                                         weight_update=weight_update,
+                                                         new_node=new_node,
+                                                         new_link=new_link)
+                new_population.append(cross_breed_offsprint)
 
             new_population = new_population + pool[population_size - len(new_population):]
 
@@ -449,7 +446,8 @@ class Genome:
         input_nodes = self.get_input_nodes()
 
         if len(input_list) != len(input_nodes):
-            raise Exception("input count must be the same as number of input nodes {} != {}".format(len(input_list), len(input_nodes)))
+            raise Exception("input count must be the same as number of input nodes {} != {}".format(len(input_list),
+                                                                                                    len(input_nodes)))
 
         # evaluate continuously while there are nodes without value
         while True:
