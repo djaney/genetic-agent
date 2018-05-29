@@ -137,9 +137,11 @@ class TestPopulationMethods(unittest.TestCase):
         for _ in range(100):
             status = p.get_status()
             for s in status.keys():
+                output = []
                 for i in range(status.get(s, 0)):
-                    p.run(s, i, [1, 2, 3])
+                    output.append(p.run(s, i, [1, 2, 3]))
                     p.set_score(s, i, 1)
+                print(s, output)
             p.evolve()
 
 
