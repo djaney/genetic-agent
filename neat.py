@@ -98,6 +98,9 @@ class Population:
 
     @staticmethod
     def speciate(population, existing_species, c1, c2, c3, species_distance_threshold):
+
+        # TODO output is double the input, need to fix
+
         new_species = {}
         for i, g in enumerate(population):
             added = False
@@ -109,13 +112,14 @@ class Population:
                     added = True
                     break
 
-            for species in list(new_species.keys()):
-                dist = species_distance(g, new_species[species][0], c1, c2, c3)
-                if species_distance_threshold >= dist:
-                    new_species[species] = new_species.get(species, [])
-                    new_species[species].append(g)
-                    added = True
-                    break
+            if not added:
+                for species in list(new_species.keys()):
+                    dist = species_distance(g, new_species[species][0], c1, c2, c3)
+                    if species_distance_threshold >= dist:
+                        new_species[species] = new_species.get(species, [])
+                        new_species[species].append(g)
+                        added = True
+                        break
 
             if not added:
                 name = 's' + str(len(new_species.keys()))
@@ -211,7 +215,7 @@ class Population:
 
             # chance to mate with other species
             if len(other_species) > 0 and random.random() < cross_breed:
-                cross_pool = random.choice(elite) + random.choice(other_species)
+                cross_pool = [random.choice(elite)] + [random.choice(other_species)]
                 cross_breed_offsprings = self.breed(cross_pool,
                                                     generation=generation,
                                                     mutation=mutation,
@@ -361,7 +365,11 @@ class Genome:
 
     def mutate_nodes(self, current_node_innovation, current_connection_innovation):
         if len(self.connections) > 0:
-            pass  # TODO
+            selected_connection = random.choice(self.connections)
+            prev_node = selected_connection.get_prev_node()
+            next_node = selected_connection.get_next_node()
+            self.create_node_between(prev_node.get_innovation(), next_node.get_innovation(), current_node_innovation+1,
+                                     current_connection_innovation+1)
 
         return current_node_innovation + 1, current_connection_innovation + 2
 

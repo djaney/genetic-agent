@@ -299,7 +299,7 @@ class TestPrinterMethods(unittest.TestCase):
         printer.print()
 
 
-@unittest.skip("Functional")
+# @unittest.skip("Functional")
 class TestFunctional(unittest.TestCase):
     def test_flow(self):
         p = Population(10, 3, 1)
@@ -312,6 +312,10 @@ class TestFunctional(unittest.TestCase):
                     p.set_score(s, i, 1)
                 print(s, output)
             p.evolve()
+
+        # print a sample
+        pr = Printer(p.population[next(iter(p.population))][0])
+        pr.print()
 
 
 if __name__ == '__main__':
