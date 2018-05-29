@@ -1,7 +1,6 @@
 import unittest
 import random
-from neat import Node, Genome, Population, align_genome, crossover, calculate_excess_disjoint, \
-    species_distance, do_evolve, Printer
+from neat import Node, Genome, Population, species_distance, Printer
 
 
 class TestPopulationMethods(unittest.TestCase):
@@ -38,7 +37,7 @@ class TestPopulationMethods(unittest.TestCase):
         # p = Population(2, 3, 1)
         # p.population['s0'] = [g1, g2]
 
-        a1, a2 = align_genome(g1, g2)
+        a1, a2 = Population.align_genome(g1, g2)
 
         self.assertEqual(1, a1[0].get_innovation())
         self.assertEqual(2, a1[1].get_innovation())
@@ -90,9 +89,9 @@ class TestPopulationMethods(unittest.TestCase):
         p.population[0] = g1
         p.population[1] = g2
 
-        a1, a2 = align_genome(g1, g2)
+        a1, a2 = Population.align_genome(g1, g2)
 
-        g3 = crossover(a1, a2, g1.get_input_nodes(), g1.get_output_nodes())
+        g3 = Population.crossover(a1, a2, g1.get_input_nodes(), g1.get_output_nodes())
 
         self.assertEqual(10, len(g3.connections))
         self.assertEqual(6, len(g3.nodes))
@@ -108,14 +107,14 @@ class TestPopulationMethods(unittest.TestCase):
         self.assertEqual(9, g3.select_connection_by_innovation(9).get_innovation())
         self.assertEqual(10, g3.select_connection_by_innovation(10).get_innovation())
 
-        self.assertEqual((2, 3), calculate_excess_disjoint(g1, g2))
+        self.assertEqual((2, 3), Population.calculate_excess_disjoint(g1, g2))
         self.assertEqual(5, species_distance(g1, g2))
 
     def test_empty_crossover(self):
         g1 = Genome(3, 1)
         g2 = Genome(3, 1)
-        a1, a2 = align_genome(g1, g2)
-        c = crossover(a1, a2, g1.get_input_nodes(), g1.get_output_nodes())
+        a1, a2 = Population.align_genome(g1, g2)
+        c = Population.crossover(a1, a2, g1.get_input_nodes(), g1.get_output_nodes())
         self.assertGreaterEqual(4, len(c.nodes))
 
 
@@ -126,10 +125,11 @@ class TestPopulationMethods(unittest.TestCase):
             if k != 's0':
                 all = all + v
             pass
-        do_evolve(p.population.get('s0'), all, 2)
+        Population.do_evolve(p.population.get('s0'), all, 2)
 
     def test_status(self):
         p = Population(10, 3, 1)
+
 
 class TestNodeMethods(unittest.TestCase):
 
@@ -271,8 +271,7 @@ class TestGenomeMethods(unittest.TestCase):
         g.connect_nodes_by_id(1, 5, 6)
         g.connect_nodes_by_id(5, 5, 7)
 
-        output = g.run([1,1,1])
-        print(output)
+        g.run([1, 1, 1])
 
 
 @unittest.skip("Printing")

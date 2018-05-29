@@ -5,34 +5,7 @@ import matplotlib.pyplot as plt
 from functools import reduce
 
 
-def align_genome(g1, g2):
-    max_innovation = np.max([g1.max_connection_innovation(), g2.max_connection_innovation()])
-    a1 = []
-    a2 = []
-    for i in range(max_innovation):
-        a1.append(g1.select_connection_by_innovation(i + 1, throw_not_found=False))
-        a2.append(g2.select_connection_by_innovation(i + 1, throw_not_found=False))
 
-    return a1, a2
-
-
-def calculate_excess_disjoint(g1, g2):
-    a1, a2 = align_genome(g1, g2)
-    length = len(a1)
-    excess = 0
-    disjoint = 0
-    for i in range(length - 1, 0, -1):
-        if (a1[i] is None) != (a2[i] is None):
-            # is excess
-            is_excess = True if i == (length - 1) else a1[i] == a1[i + 1]
-            if is_excess and disjoint == 0:
-                excess = excess + 1
-            else:
-                disjoint = disjoint + 1
-        else:
-            break
-
-    return excess, disjoint
 
 
 def calculate_average_weights(gene):
@@ -40,7 +13,7 @@ def calculate_average_weights(gene):
 
 
 def species_distance(g1, g2, c1=1.0, c2=1.0, c3=3.0):
-    excess, disjoint = calculate_excess_disjoint(g1, g2)
+    excess, disjoint = Population.calculate_excess_disjoint(g1, g2)
     average_weights = np.mean([calculate_average_weights(g1) + calculate_average_weights(g2)])
     g1_count = len(g1.connections)
     g2_count = len(g2.connections)
@@ -50,130 +23,7 @@ def species_distance(g1, g2, c1=1.0, c2=1.0, c3=3.0):
     return dist
 
 
-def do_evolve(pool, other_species, generation, elite_size=0.4, champ_threshold=5, history_check=15, mutation=0.8,
-              weight_update=0.9, new_node=0.03, new_link=0.05, cross_breed=0.001):
-    population_size = len(pool)
-    new_population = []
 
-    # if did improve during last 15
-    last_hist_list = [g.score_history[-history_check] for g in pool if len(g.score_history) >= history_check]
-    last_score = np.max([g.score for g in pool])
-    last_hist_mean = np.mean(last_hist_list) if len(last_hist_list) > 0 else None
-    did_improved = last_hist_mean is None or last_hist_mean < last_score
-    if did_improved:
-        # breed top 40%
-        pool = sorted(pool, key=lambda x: x.score, reverse=True)
-        elite = pool[:math.floor(population_size * elite_size)]
-        new_population = new_population + breed(elite, generation, mutation=mutation, weight_update=weight_update,
-                                                new_node=new_node, new_link=new_link)
-        # copy champion of each species with minimum size
-        if population_size > champ_threshold:
-            new_population.append(pool[0])
-
-        # chance to mate with other species
-        if len(other_species) > 0 and random.random() < cross_breed:
-            new_population.append(breed(random.choice(elite), random.choice(other_species)))
-
-        new_population = new_population + pool[population_size - len(new_population):]
-
-    else:
-        new_population = pool
-
-    return new_population
-
-
-def update_random_weight(genome, update=False):
-    pass
-
-
-def breed(population, generation, mutation, weight_update, new_node, new_link):
-    initial_size = len(population)
-    new_population = []
-    for _ in range(initial_size):
-        sample = random.sample(population, 2)
-        a1, a2 = align_genome(sample[0], sample[1])
-        g = crossover(a1, a2, sample[0].get_input_nodes(), sample[0].get_output_nodes())
-        g.generation = generation
-        new_population.append(g)
-    # 80% offspring mutation
-    if random.random() < mutation:
-        # 90% chance update weight & 10% to reset TODO
-        do_update = random.random() < weight_update
-        update_random_weight(random.choice(new_population), update=do_update)  # otherwise reset
-
-        # 0.03 chance of new node for small population TODO
-        pass
-
-    return new_population
-
-
-def crossover(a1, a2, input_nodes, output_nodes):
-    if len(a1) != len(a2):
-        raise Exception('inputs not the same length')
-
-    child_connections = []
-    for i in range(len(a1)):
-
-        if a1[i] is not None and a2[i] is not None:
-            if random.random() > 0.5:
-                child_connections.append(a1[i])
-            else:
-                child_connections.append(a2[i])
-        elif a1[i] is None and a2[i] is not None:
-            child_connections.append(a2[i])
-        elif a1[i] is not None and a2[i] is None:
-            child_connections.append(a1[i])
-        else:
-            # disjoint
-            pass
-    child_genome = Genome(0, 0)
-
-    for c in child_connections:
-        prev_node = c.get_prev_node()
-        next_node = c.get_next_node()
-        if c not in child_genome.connections:
-            child_genome.connections.append(c)
-        if not child_genome.has_node_with_innovation(prev_node.get_innovation()):
-            child_genome.nodes.append(prev_node)
-        if not child_genome.has_node_with_innovation(next_node.get_innovation()):
-            child_genome.nodes.append(next_node)
-
-    for n in input_nodes:
-        if not child_genome.has_node_with_innovation(n.get_innovation()):
-            child_genome.nodes.append(n)
-
-    for n in output_nodes:
-        if not child_genome.has_node_with_innovation(n.get_innovation()):
-            child_genome.nodes.append(n)
-
-    return child_genome
-
-
-def speciate(population, existing_species, c1, c2, c3, species_distance_threshold):
-    new_species = {}
-    for i, g in enumerate(population):
-        added = False
-        for species in list(existing_species.keys()):
-            dist = species_distance(g, existing_species[species][0], c1, c2, c3)
-            if species_distance_threshold >= dist:
-                new_species[species] = new_species.get(species, [])
-                new_species[species].append(g)
-                added = True
-                break
-
-        for species in list(new_species.keys()):
-            dist = species_distance(g, new_species[species][0], c1, c2, c3)
-            if species_distance_threshold >= dist:
-                new_species[species] = new_species.get(species, [])
-                new_species[species].append(g)
-                added = True
-                break
-
-        if not added:
-            name = 's' + str(len(new_species.keys()))
-            new_species[name] = new_species.get(name, [])
-            new_species[name].append(g)
-    return new_species
 
 
 class Population:
@@ -193,8 +43,11 @@ class Population:
         for _ in range(size):
             population.append(Genome(inputs, outputs))
 
-        self.population = speciate(population, self.population, c1=self.c1, c2=self.c2, c3=self.c3,
-                                   species_distance_threshold=self.species_distance_threshold)
+        self.population = Population.speciate(population, self.population,
+                                              c1=self.c1,
+                                              c2=self.c2,
+                                              c3=self.c3,
+                                              species_distance_threshold=self.species_distance_threshold)
 
     def get_population(self):
         return self.population
@@ -208,8 +61,167 @@ class Population:
     def set_score(self, s, i, score):
         self.population.get(s)[i].set_score(score)
 
+    @staticmethod
+    def update_random_weight(genome, update=False):
+        pass
+
+    @staticmethod
+    def crossover(a1, a2, input_nodes, output_nodes):
+        if len(a1) != len(a2):
+            raise Exception('inputs not the same length')
+
+        child_connections = []
+        for i in range(len(a1)):
+
+            if a1[i] is not None and a2[i] is not None:
+                if random.random() > 0.5:
+                    child_connections.append(a1[i])
+                else:
+                    child_connections.append(a2[i])
+            elif a1[i] is None and a2[i] is not None:
+                child_connections.append(a2[i])
+            elif a1[i] is not None and a2[i] is None:
+                child_connections.append(a1[i])
+            else:
+                # disjoint
+                pass
+        child_genome = Genome(0, 0)
+
+        for c in child_connections:
+            prev_node = c.get_prev_node()
+            next_node = c.get_next_node()
+            if c not in child_genome.connections:
+                child_genome.connections.append(c)
+            if not child_genome.has_node_with_innovation(prev_node.get_innovation()):
+                child_genome.nodes.append(prev_node)
+            if not child_genome.has_node_with_innovation(next_node.get_innovation()):
+                child_genome.nodes.append(next_node)
+
+        for n in input_nodes:
+            if not child_genome.has_node_with_innovation(n.get_innovation()):
+                child_genome.nodes.append(n)
+
+        for n in output_nodes:
+            if not child_genome.has_node_with_innovation(n.get_innovation()):
+                child_genome.nodes.append(n)
+
+        return child_genome
+
+    @staticmethod
+    def speciate(population, existing_species, c1, c2, c3, species_distance_threshold):
+        new_species = {}
+        for i, g in enumerate(population):
+            added = False
+            for species in list(existing_species.keys()):
+                dist = species_distance(g, existing_species[species][0], c1, c2, c3)
+                if species_distance_threshold >= dist:
+                    new_species[species] = new_species.get(species, [])
+                    new_species[species].append(g)
+                    added = True
+                    break
+
+            for species in list(new_species.keys()):
+                dist = species_distance(g, new_species[species][0], c1, c2, c3)
+                if species_distance_threshold >= dist:
+                    new_species[species] = new_species.get(species, [])
+                    new_species[species].append(g)
+                    added = True
+                    break
+
+            if not added:
+                name = 's' + str(len(new_species.keys()))
+                new_species[name] = new_species.get(name, [])
+                new_species[name].append(g)
+        return new_species
+
+    @staticmethod
+    def breed(population, generation, mutation, weight_update, new_node, new_link):
+        initial_size = len(population)
+        new_population = []
+        for _ in range(initial_size):
+            sample = random.sample(population, 2)
+            a1, a2 = Population.align_genome(sample[0], sample[1])
+            g = Population.crossover(a1, a2, sample[0].get_input_nodes(), sample[0].get_output_nodes())
+            g.generation = generation
+            new_population.append(g)
+        # 80% offspring mutation
+        if random.random() < mutation:
+            # 90% chance update weight & 10% to reset TODO
+            do_update = random.random() < weight_update
+            Population.update_random_weight(random.choice(new_population), update=do_update)  # otherwise reset
+
+            # 0.03 chance of new node for small population TODO
+            pass
+
+        return new_population
+
+    @staticmethod
+    def calculate_excess_disjoint(g1, g2):
+        a1, a2 = Population.align_genome(g1, g2)
+        length = len(a1)
+        excess = 0
+        disjoint = 0
+        for i in range(length - 1, 0, -1):
+            if (a1[i] is None) != (a2[i] is None):
+                # is excess
+                is_excess = True if i == (length - 1) else a1[i] == a1[i + 1]
+                if is_excess and disjoint == 0:
+                    excess = excess + 1
+                else:
+                    disjoint = disjoint + 1
+            else:
+                break
+
+        return excess, disjoint
+
+    @staticmethod
+    def align_genome(g1, g2):
+        max_innovation = np.max([g1.max_connection_innovation(), g2.max_connection_innovation()])
+        a1 = []
+        a2 = []
+        for i in range(max_innovation):
+            a1.append(g1.select_connection_by_innovation(i + 1, throw_not_found=False))
+            a2.append(g2.select_connection_by_innovation(i + 1, throw_not_found=False))
+
+        return a1, a2
+
     def run(self, s, i, input_list):
         return self.population.get(s)[i].run(input_list)
+
+    @staticmethod
+    def do_evolve(pool, other_species, generation, elite_size=0.4, champ_threshold=5, history_check=15, mutation=0.8,
+                  weight_update=0.9, new_node=0.03, new_link=0.05, cross_breed=0.001):
+        population_size = len(pool)
+        new_population = []
+
+        # if did improve during last 15
+        last_hist_list = [g.score_history[-history_check] for g in pool if len(g.score_history) >= history_check]
+        last_score = np.max([g.score for g in pool])
+        last_hist_mean = np.mean(last_hist_list) if len(last_hist_list) > 0 else None
+        did_improved = last_hist_mean is None or last_hist_mean < last_score
+        if did_improved:
+            # breed top 40%
+            pool = sorted(pool, key=lambda x: x.score, reverse=True)
+            elite = pool[:math.floor(population_size * elite_size)]
+            new_population = new_population + Population.breed(elite, generation,
+                                                               mutation=mutation,
+                                                               weight_update=weight_update,
+                                                               new_node=new_node,
+                                                               new_link=new_link)
+            # copy champion of each species with minimum size
+            if population_size > champ_threshold:
+                new_population.append(pool[0])
+
+            # chance to mate with other species
+            if len(other_species) > 0 and random.random() < cross_breed:
+                new_population.append(Population.breed(random.choice(elite), random.choice(other_species)))
+
+            new_population = new_population + pool[population_size - len(new_population):]
+
+        else:
+            new_population = pool
+
+        return new_population
 
     def evolve(self):
         new_population = []
@@ -220,10 +232,13 @@ class Population:
                     other_population = other_population + v
 
             population_to_evolve = self.population.get(species)
-            new_population = new_population + do_evolve(population_to_evolve, other_population, self.generation)
+            new_population = new_population + self.do_evolve(population_to_evolve, other_population, self.generation)
 
-        self.population = speciate(new_population, self.population, c1=self.c1, c2=self.c2, c3=self.c3,
-                                   species_distance_threshold=self.species_distance_threshold)
+        self.population = Population.speciate(new_population, self.population,
+                                              c1=self.c1,
+                                              c2=self.c2,
+                                              c3=self.c3,
+                                              species_distance_threshold=self.species_distance_threshold)
 
         self.generation = self.generation + 1
 
