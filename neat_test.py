@@ -273,6 +273,16 @@ class TestGenomeMethods(unittest.TestCase):
 
         g.run([1, 1, 1])
 
+    def test_evolution(self):
+        p = Population(10, 3, 1)
+        status = p.get_status()
+        for s in status.keys():
+            output = []
+            for i in range(status.get(s, 0)):
+                output.append(p.run(s, i, [1, 2, 3]))
+                p.set_score(s, i, 1)
+        p.evolve()
+
 
 @unittest.skip("Printing")
 class TestPrinterMethods(unittest.TestCase):
