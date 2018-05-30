@@ -456,6 +456,8 @@ class Genome:
     def evaluate_layer(self, nodes):
         # calculate values for each nodes
         for n in nodes:
+            if n.get_type() == Node.TYPE_INPUT:
+                continue
             value = 0
             # get each connection
             for c in n.get_prev_connections():
@@ -466,8 +468,8 @@ class Genome:
                 else:
                     c.set_skipped(True)
                 c.set_activated(True)
-            # then add bias
-            value = value + n.get_bias()
+            # then add bias and sigmoid
+            value = 1 / (1 + math.exp(-value)) + n.get_bias()
             n.set_activated(True)
             n.set_value(value)
 
