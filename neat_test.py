@@ -309,7 +309,8 @@ class TestFunctional(unittest.TestCase):
             for s in status.keys():
                 output = []
                 for i in range(status.get(s, 0)):
-                    output.append(p.run(s, i, [1, 2, 3]))
+                    out = p.run(s, i, [1, 2, 3])[0]
+                    output.append(out)
                     p.set_score(s, i, 1)
                 print(s, output)
             p.evolve()

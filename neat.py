@@ -265,7 +265,11 @@ class Genome:
         self.score_history = []
         self.score = 0
         self.generation = 1
-        self.initializer = initializer
+
+        if initializer is None:
+            self.initializer = random_initializer
+        else:
+            self.initializer = initializer
 
         innovation = 1
         for _ in range(input_count):
@@ -395,8 +399,24 @@ class Genome:
         return current_connection_innovation + 1
 
     def mutate_weights(self, update):
-        # update else reset
-        pass  # TODO
+        # get mutable enitities
+        choices = [n for n in self.nodes if n.get_type() != Node.TYPE_INPUT]
+        choices = choices + [c for c in self.connections]
+
+        # choose 1
+        target = random.choice(choices)
+
+        # mutate if node
+        if isinstance(target, Node):
+            target.set_bias(target.get_bias() * random.random() if update else self.initializer())
+
+        # mutate if connection
+        elif isinstance(target, Connections):
+            target.set_weight(target.get_weight() * random.random() if update else self.initializer())
+
+        # error if neither
+        else:
+            raise Exception("Invalid Type")
 
     def select_connection_by_innovation(self, innovation, throw_not_found=True):
         connection = None
@@ -618,6 +638,9 @@ class Connections:
 
     def get_weight(self):
         return self.weight
+
+    def set_weight(self, weight):
+        self.weight = weight
 
 
 class Printer:
