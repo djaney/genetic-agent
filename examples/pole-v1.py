@@ -11,7 +11,7 @@ strain_count = 10
 passing_score = 500
 p = Population(1000, env.observation_space.shape[0], env.action_space.n)
 
-for _ in range(20):
+for _ in range(100):
     status = p.get_status()
     for s in status.keys():
         output = []

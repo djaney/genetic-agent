@@ -110,6 +110,25 @@ class TestPopulationMethods(unittest.TestCase):
         self.assertEqual((2, 3), Population.calculate_excess_disjoint(g1, g2))
         self.assertEqual(5, species_distance(g1, g2))
 
+    def test_another_crossover(self):
+        g1 = Genome(3, 1)
+        g2 = Genome(3, 1)
+
+        node_i = 4
+        conn_i = 0
+
+        for generation in range(10):
+            conn_i = g1.mutate_connections(conn_i)
+            node_i, conn_i = g1.mutate_nodes(node_i, conn_i)
+            conn_i = g2.mutate_connections(conn_i)
+            node_i, conn_i = g2.mutate_nodes(node_i, conn_i)
+
+            a1, a2 = Population.align_genome(g1, g2)
+            g1 = Population.crossover(a1, a2, g1.get_input_nodes(), g1.get_output_nodes())
+            g2 = Population.crossover(a1, a2, g1.get_input_nodes(), g1.get_output_nodes())
+
+        Printer(g1).print()
+
     def test_empty_crossover(self):
         g1 = Genome(3, 1)
         g2 = Genome(3, 1)
@@ -124,7 +143,7 @@ class TestPopulationMethods(unittest.TestCase):
             if k != 's0':
                 entire_population = entire_population + v
             pass
-        p.do_evolve(p.population.get('s0'), entire_population, 2)
+        p.evolve_species(p.population.get('s0'), entire_population, 2)
 
     def test_status(self):
         p = Population(10, 3, 1)
@@ -311,7 +330,7 @@ class TestFunctional(unittest.TestCase):
                 for i in range(status.get(s, 0)):
                     out = p.run(s, i, [1, 2, 3])[0]
                     output.append(out)
-                    p.set_score(s, i, out)
+                    p.set_score(s, i, random.randrange(1, 10))
                 print(s, output)
             p.evolve()
 

@@ -140,6 +140,7 @@ class Population:
             g = Population.crossover(a1, a2, sample[0].get_input_nodes(), sample[0].get_output_nodes())
             g.generation = generation
             new_population.append(g)
+        # new_population = population
 
         # for each offspring
         for offspring in new_population:
@@ -193,14 +194,14 @@ class Population:
     def run(self, s, i, input_list):
         return self.population.get(s)[i].run(input_list)
 
-    def do_evolve(self, pool, other_species, generation, elite_size=0.4, champ_threshold=5, history_check=15,
-                  mutation=0.8,
-                  weight_update=0.9, new_node=0.03, new_link=0.05, cross_breed=0.001):
+    def evolve_species(self, pool, other_species, generation, elite_size=0.4, champ_threshold=5, history_check=15,
+                       mutation=0.8,
+                       weight_update=0.9, new_node=0.03, new_link=0.05, cross_breed=0.001):
         population_size = len(pool)
         new_population = []
 
         # if did improve during last 15
-        last_hist_list = [g.score_history[-history_check] for g in pool if len(g.score_history) >= history_check]
+        last_hist_list = [np.mean(g.score_history[-history_check:]) for g in pool if len(g.score_history) >= history_check]
         last_score = np.max([g.score for g in pool])
         last_hist_mean = np.mean(last_hist_list) if len(last_hist_list) > 0 else None
         did_improved = last_hist_mean is None or last_hist_mean < last_score
@@ -211,10 +212,10 @@ class Population:
 
             if len(elite) > 1:
                 new_population = new_population + self.breed(elite, generation,
-                                                             mutation=mutation,
-                                                             weight_update=weight_update,
-                                                             new_node=new_node,
-                                                             new_link=new_link)
+                                                             mutation,
+                                                             weight_update,
+                                                             new_node,
+                                                             new_link)
 
             # copy champion of each species with minimum size
             if population_size > champ_threshold:
@@ -224,11 +225,12 @@ class Population:
             if len(other_species) > 0 and random.random() < cross_breed:
                 cross_pool = [random.choice(elite)] + [random.choice(other_species)]
                 cross_breed_offsprings = self.breed(cross_pool,
-                                                    generation=generation,
-                                                    mutation=mutation,
-                                                    weight_update=weight_update,
-                                                    new_node=new_node,
-                                                    new_link=new_link)
+                                                    generation,
+                                                    mutation,
+                                                    weight_update,
+                                                    new_node,
+                                                    new_link)
+
                 new_population = new_population + cross_breed_offsprings
 
             new_population = new_population + pool[population_size - len(new_population):]
@@ -247,7 +249,7 @@ class Population:
                     other_population = other_population + v
 
             population_to_evolve = self.population.get(species)
-            new_population = new_population + self.do_evolve(population_to_evolve, other_population, self.generation)
+            new_population = new_population + self.evolve_species(population_to_evolve, other_population, self.generation)
 
         self.population = Population.speciate(new_population, self.population,
                                               c1=self.c1,
@@ -327,9 +329,12 @@ class Genome:
         if existing_connection is not None:
             # if there is an existing connection
             # remove the connection
-            existing_connection.get_prev_node().get_next_connections().remove(existing_connection)
-            existing_connection.get_next_node().get_prev_connections().remove(existing_connection)
-            self.connections.remove(existing_connection)
+            if existing_connection in existing_connection.get_prev_node().get_next_connections():
+                existing_connection.get_prev_node().get_next_connections().remove(existing_connection)
+            if existing_connection in existing_connection.get_next_node().get_prev_connections():
+                existing_connection.get_next_node().get_prev_connections().remove(existing_connection)
+            if existing_connection in self.connections:
+                self.connections.remove(existing_connection)
 
         # create node
         new_node = self.create_node(Node.TYPE_HIDDEN, innovation)
@@ -381,7 +386,8 @@ class Genome:
             next_node = selected_connection.get_next_node()
             self.create_node_between(prev_node.get_innovation(), next_node.get_innovation(),
                                      current_node_innovation + 1,
-                                     current_connection_innovation + 1)
+                                     current_connection_innovation + 1,
+                                     existing_connection=selected_connection)
 
         return current_node_innovation + 1, current_connection_innovation + 2
 
@@ -697,7 +703,11 @@ class Printer:
         for c in genome.connections:
             prev_innovation = c.get_prev_node().get_innovation()
             next_innovation = c.get_next_node().get_innovation()
+            if prev_innovation not in self.printed_nodes.keys():
+                continue
             from_x, from_y = self.printed_nodes.get(prev_innovation)
+            if next_innovation not in self.printed_nodes.keys():
+                continue
             to_x, to_y = self.printed_nodes.get(next_innovation)
             if prev_innovation != next_innovation:
                 self.ax.arrow(from_x, from_y, to_x - from_x, to_y - from_y, head_width=0.03, head_length=0.1, fc='k',
