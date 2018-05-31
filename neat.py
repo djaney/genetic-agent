@@ -201,7 +201,7 @@ class Population:
         new_population = []
 
         # if did improve during last 15
-        last_hist_list = [np.mean(g.score_history[-history_check:]) for g in pool if len(g.score_history) >= history_check]
+        last_hist_list = [np.mean(g.score_history[-history_check:]) for g in pool if len(g.score_history) > 0]
         last_score = np.max([g.score for g in pool])
         last_hist_mean = np.mean(last_hist_list) if len(last_hist_list) > 0 else None
         did_improved = last_hist_mean is None or last_hist_mean < last_score
@@ -235,7 +235,6 @@ class Population:
                 new_population = new_population + cross_breed_offsprings
 
             new_population = new_population + pool[population_size - len(new_population):]
-
         else:
             new_population = pool
 
