@@ -206,6 +206,7 @@ class Population:
         last_hist_mean = np.mean(last_hist_list) if len(last_hist_list) > 0 else None
         did_improved = last_hist_mean is None or last_hist_mean < last_score
         if did_improved:
+            # TODO this does not converge because it will continue repeating if there is no improvement
             # breed top 40%
             pool = sorted(pool, key=lambda x: x.score, reverse=True)
             elite = pool[:math.ceil(population_size * elite_size)]
@@ -475,7 +476,8 @@ class Genome:
                     c.set_skipped(True)
                 c.set_activated(True)
             # then add bias and sigmoid
-            value = 1 / (1 + math.exp(-value)) + n.get_bias()
+            # value = 1 / (1 + math.exp(-value)) + n.get_bias()
+            value = np.max([0, value]) + n.get_bias()
             n.set_activated(True)
             n.set_value(value)
 
