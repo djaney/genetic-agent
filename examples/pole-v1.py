@@ -10,7 +10,7 @@ done = False
 strain_count = 10
 passing_score = 500
 p = Population(1000, env.observation_space.shape[0], env.action_space.n)
-target_reward = 100
+target_reward = 500
 max_reward = 0
 winner = None
 while True:
