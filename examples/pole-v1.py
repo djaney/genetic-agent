@@ -11,7 +11,8 @@ strain_count = 10
 passing_score = 500
 p = Population(1000, env.observation_space.shape[0], env.action_space.n)
 
-for _ in range(100):
+max_reward = 0
+while True:
     status = p.get_status()
     for s in status.keys():
         output = []
@@ -26,7 +27,12 @@ for _ in range(100):
                 if done:
                     break
             p.set_score(s, i, reward_sum)
+            max_reward = np.max([reward_sum, max_reward])
             print(reward_sum)
+
+    if max_reward > 100:
+        break
+
     p.evolve()
 
 pr = Printer(p.population[next(iter(p.population))][0])
