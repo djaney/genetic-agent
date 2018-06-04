@@ -34,7 +34,7 @@ while True:
         if max_reward >= target_reward:
             break
     print(p.generation, max_reward, p.population.keys())
-    if max_reward > target_reward:
+    if max_reward >= target_reward:
         break
     p.evolve()
 
