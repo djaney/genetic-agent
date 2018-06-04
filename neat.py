@@ -1,8 +1,10 @@
 import numpy as np
 import math
 import random
+import os
 import matplotlib.pyplot as plt
 from functools import reduce
+import pickle
 
 
 def calculate_average_weights(gene):
@@ -49,6 +51,26 @@ class Population:
                                               c2=self.c2,
                                               c3=self.c3,
                                               species_distance_threshold=self.species_distance_threshold)
+
+    def save(self, name):
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        with open('{}/save/{}'.format(dir_path, name), 'wb') as file:
+            pickle.dump(self, file, pickle.HIGHEST_PROTOCOL)
+
+    @staticmethod
+    def load(name):
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        with open('{}/save/{}'.format(dir_path, name), 'rb') as file:
+            return pickle.load(file)
+
+    def get_winner(self):
+        winner = None
+        for species, genes in self.population.items():
+            for gene in genes:
+                if winner is None or winner.get_score() < gene.get_score():
+                    winner = gene
+        return winner
+
 
     def get_population(self):
         return self.population
@@ -299,6 +321,9 @@ class Genome:
     def set_score(self, score):
         self.score_history.append(self.score)
         self.score = score
+
+    def get_score(self):
+        return self.score
 
     def create_node(self, node_type, innovation):
         new_node = Node(innovation, node_type, initializer=self.initializer)
