@@ -38,7 +38,7 @@ while True:
         break
     p.evolve()
 
-print(winner)
+print('Species {} is the winner'.format(winner[0]))
 
 ob = env.reset()
 
@@ -47,7 +47,7 @@ while True:
     ob, reward, done, info = env.step(np.argmax(action))
     env.render()
     if done:
-        break
+        ob = env.reset()
 
 Printer(p.population[winner[0]][winner[1]]).print()
 
