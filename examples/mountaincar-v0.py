@@ -11,11 +11,11 @@ done = False
 strain_count = 10
 passing_score = 500
 p = Population(1000, 2, 3)
-target_reward = 0.6
+target_reward = 0.5
 max_reward = -999999
 winner = None
 max_position = -1.2
-min_position = 0.5
+min_position = 0.6
 while True:
     status = p.get_status()
     for s in status.keys():
