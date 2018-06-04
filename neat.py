@@ -19,8 +19,10 @@ def species_distance(g1, g2, c1=1.0, c2=1.0, c3=3.0):
     dist = (c1 * excess / max_genome_count) + (c2 * disjoint / max_genome_count) + (c3 * average_weights)
     return dist
 
+
 def random_initializer():
     return random.random();
+
 
 class Population:
     def __init__(self, size, inputs, outputs, c1=1.0, c2=1.0, c3=3.0, species_distance_threshold=4.0, initializer=None):
@@ -222,21 +224,32 @@ class Population:
             if population_size > champ_threshold:
                 new_population.append(pool[0])
 
-            # chance to mate with other species
-            if len(other_species) > 0 and random.random() < cross_breed:
-                cross_pool = [random.choice(elite)] + [random.choice(other_species)]
-                cross_breed_offsprings = self.breed(cross_pool,
-                                                    generation,
-                                                    mutation,
-                                                    weight_update,
-                                                    new_node,
-                                                    new_link)
+            while len(new_population) < population_size:
+                if len(other_species) > 0 and random.random() < cross_breed:
+                    # chance to mate with other species
+                    cross_pool = [random.choice(elite)] + [random.choice(other_species)]
+                    cross_breed_offsprings = self.breed(cross_pool,
+                                                        generation,
+                                                        mutation,
+                                                        weight_update,
+                                                        new_node,
+                                                        new_link)
+                    new_population = new_population + cross_breed_offsprings
+                elif len(pool) > 1:
+                    # mate with own species
+                    normal_pool = random.sample(pool, 2)
+                    normal_breed_offspring = self.breed(normal_pool,
+                                                        generation,
+                                                        mutation,
+                                                        weight_update,
+                                                        new_node,
+                                                        new_link)
+                    new_population = new_population + normal_breed_offspring
 
-                new_population = new_population + cross_breed_offsprings
-
-            new_population = new_population + pool[population_size - len(new_population):]
         else:
             new_population = pool
+
+        new_population = new_population + pool[population_size - len(new_population):]
 
         return new_population
 
@@ -249,7 +262,8 @@ class Population:
                     other_population = other_population + v
 
             population_to_evolve = self.population.get(species)
-            new_population = new_population + self.evolve_species(population_to_evolve, other_population, self.generation)
+            new_population = new_population + self.evolve_species(population_to_evolve, other_population,
+                                                                  self.generation)
 
         self.population = Population.speciate(new_population, self.population,
                                               c1=self.c1,

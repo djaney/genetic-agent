@@ -28,10 +28,10 @@ while True:
                     break
             p.set_score(s, i, reward_sum)
             max_reward = np.max([reward_sum, max_reward])
-            if max_reward > target_reward:
+            if max_reward >= target_reward:
                 winner = (s, i)
                 break
-        if max_reward > target_reward:
+        if max_reward >= target_reward:
             break
     print(p.generation, max_reward, p.population.keys())
     if max_reward > target_reward:
