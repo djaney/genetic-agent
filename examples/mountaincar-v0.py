@@ -15,7 +15,7 @@ target_reward = 0.6
 max_reward = -999999
 winner = None
 max_position = -1.2
-min_position = 0.6
+min_position = 0.5
 while True:
     status = p.get_status()
     for s in status.keys():
