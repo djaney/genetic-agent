@@ -1,57 +1,61 @@
+
 import gym
 
 import numpy as np
-from evolution import Species
+from neat import Population, Printer
 
 env = gym.make('MountainCar-v0')
 
 done = False
 
 strain_count = 10
-generation_check = 10
-agent = Species(input_count=2, output_count=3, hidden=3, depth=0,
-                strain_count=strain_count, final_activation='softmax')
-
-agent.strains[0].summary()
-
-
-def play(a, e, index, render=False):
-    reward_sum = 200
-    max_position = -1.2
-    min_position = 0.6
-    ob = e.reset()
-    while True:
-        action = a.act(ob, index)
-        ob, reward, done, info = e.step(np.argmax(action))
-        max_position = np.max([max_position, ob[0]])
-        min_position = np.min([min_position, ob[0]])
-        reward_sum = reward_sum + reward
-        if render:
-            env.render()
-
-        if done:
-            break
-
-    # negative_reward + distance covered
-    reward_sum = reward_sum + ((max_position + 1.2) - (min_position + 1.2))
-
-    return reward_sum
-
-
-# learn
+passing_score = 500
+p = Population(1000, 2, 3)
+target_reward = 0.6
+max_reward = -999999
+winner = None
+max_position = -1.2
+min_position = 0.6
 while True:
+    status = p.get_status()
+    for s in status.keys():
+        output = []
+        for i in range(status.get(s, 0)):
+            ob = env.reset()
+            reward_sum = 200
+            while True:
+                action = p.run(s, i, ob)
+                ob, reward, done, info = env.step(np.argmax(action))
+                max_position = np.max([max_position, ob[0]])
+                min_position = np.min([min_position, ob[0]])
+                reward_sum = reward_sum + reward
+                if done:
+                    break
 
-    scores = []
-    max_score = 0
+            reward_sum = reward_sum + ((max_position + 1.2) - (min_position + 1.2))
+            max_reward = np.max([reward_sum, max_reward])
+            p.set_score(s, i, reward_sum)
 
-    # play every strain
-    for i in range(strain_count):
-        score = play(agent, env, i)
-        agent.record(score, i)
-        scores.append(score)
-    print("generation {} max score {}".format(agent.current_generation, np.max(scores)))
+            if max_position >= target_reward:
+                winner = (s, i)
+                break
 
-    agent.evolve()
+        if max_position >= target_reward:
+            break
+    print('Generation: {} Score: {} Max position: {} Population: {}'.format(p.generation, reward_sum, max_position, p.population.keys()))
+    if max_position >= target_reward:
+        break
+    p.evolve()
 
-    if 0 == agent.current_generation % generation_check:
-        play(agent, env, 0, True)
+print('Species {} is the winner'.format(winner[0]))
+
+ob = env.reset()
+
+while True:
+    action = action = p.run(winner[0], winner[1], ob)
+    ob, reward, done, info = env.step(np.argmax(action))
+    env.render()
+    if done:
+        break
+
+Printer(p.population[winner[0]][winner[1]]).print()

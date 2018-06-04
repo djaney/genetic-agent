@@ -47,7 +47,7 @@ while True:
     ob, reward, done, info = env.step(np.argmax(action))
     env.render()
     if done:
-        ob = env.reset()
+        break
 
 Printer(p.population[winner[0]][winner[1]]).print()
 
