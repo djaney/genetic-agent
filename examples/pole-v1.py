@@ -48,7 +48,10 @@ def train():
             if max_reward >= target_reward:
                 break
 
-        p.save('cart-pole.pkl')
+        try:
+            p.save('cart-pole.pkl')
+        except RuntimeError as e:
+            print('error saving: {}'.format(str(e)))
 
         print(p.generation, max_reward, p.population.keys())
         if max_reward >= target_reward:
