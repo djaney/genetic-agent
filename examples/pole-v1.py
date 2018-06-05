@@ -1,8 +1,10 @@
 import gym
 import argparse
 import numpy as np
+import sys
 from neat import Population, Printer
 
+sys.setrecursionlimit(2000)
 
 def play():
     env = gym.make('CartPole-v1')
