@@ -15,7 +15,7 @@ def play():
     winner = p.get_winner()
 
     while True:
-        action = action = winner.run(ob)
+        action = winner.run(ob)
         ob, reward, done, info = env.step(np.argmax(action))
         env.render()
         if done:
