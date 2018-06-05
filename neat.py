@@ -71,7 +71,6 @@ class Population:
                     winner = gene
         return winner
 
-
     def get_population(self):
         return self.population
 
@@ -230,17 +229,9 @@ class Population:
         last_hist_mean = np.mean(last_hist_list) if len(last_hist_list) > 0 else None
         did_improved = last_hist_mean is None or last_hist_mean < last_score
         if did_improved:
-            # TODO this does not converge because it will continue repeating if there is no improvement
             # breed top 40%
             pool = sorted(pool, key=lambda x: x.score, reverse=True)
             elite = pool[:math.ceil(population_size * elite_size)]
-
-            if len(elite) > 1:
-                new_population = new_population + self.breed(elite, generation,
-                                                             mutation,
-                                                             weight_update,
-                                                             new_node,
-                                                             new_link)
 
             # copy champion of each species with minimum size
             if population_size > champ_threshold:
@@ -257,16 +248,16 @@ class Population:
                                                         new_node,
                                                         new_link)
                     new_population = new_population + cross_breed_offsprings
-                elif len(pool) > 1:
+                elif len(elite) > 1:
                     # mate with own species
-                    normal_pool = random.sample(pool, 2)
-                    normal_breed_offspring = self.breed(normal_pool,
-                                                        generation,
-                                                        mutation,
-                                                        weight_update,
-                                                        new_node,
-                                                        new_link)
-                    new_population = new_population + normal_breed_offspring
+                    elite_pool = random.sample(elite, 2)
+                    elite_breed_offspring = self.breed(elite_pool,
+                                                       generation,
+                                                       mutation,
+                                                       weight_update,
+                                                       new_node,
+                                                       new_link)
+                    new_population = new_population + elite_breed_offspring
 
         else:
             new_population = pool
