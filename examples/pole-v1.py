@@ -23,7 +23,7 @@ def play():
 def train():
     env = gym.make('CartPole-v1')
 
-    p = Population(200, env.observation_space.shape[0], env.action_space.n)
+    p = Population(1000, env.observation_space.shape[0], env.action_space.n)
     target_reward = 500
     max_reward = 0
     winner = None
