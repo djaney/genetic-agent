@@ -416,7 +416,7 @@ class Genome:
         return current_node_innovation + 1, current_connection_innovation + 2
 
     def mutate_connections(self, current_connection_innovation):
-        node_from = random.choice([n for n in self.nodes if n.node_type != Node.TYPE_OUTPUT])
+        node_from = random.choice([n for n in self.nodes])
         node_to_choices = [n for n in self.nodes if n.node_type != Node.TYPE_INPUT and
                            not n.is_connected_to_prev_by_id(node_from.get_innovation())]
 
@@ -699,14 +699,13 @@ class Printer:
         self.plot(self.genome)
 
     def iterate_layer(self, nodes):
-        x = self.printed_nodes
         y = self.print_layer(nodes, layer=self.layer)
-        self.printed_nodes = {**x, **y}
+        self.printed_nodes = {**self.printed_nodes, **y}
         next_nodes = []
         for n in nodes:
             for n2 in n.get_next_nodes():
-                if n2 not in self.finished_nodes and n2.get_type() != Node.TYPE_OUTPUT:
-                    self.finished_nodes.append(n2)
+                if n2.get_innovation() not in self.finished_nodes and n2.get_type():
+                    self.finished_nodes.append(n2.get_innovation())
                     next_nodes.append(n2)
 
         self.layer = self.layer + 1
@@ -746,7 +745,7 @@ class Printer:
                 print("need to find a way to print self pointing arrow")
 
         # print dots
-        self.ax.scatter(self.scatter_x, self.scatter_y, s=500)
+        self.ax.scatter(self.scatter_x, self.scatter_y, s=100)
 
         # hide axis ticks
         self.ax.set_yticklabels([])
