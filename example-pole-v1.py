@@ -2,16 +2,20 @@ import gym
 import argparse
 import numpy as np
 import sys
+import os
 from neat import Population, Printer
 
 sys.setrecursionlimit(2000)
+FILENAME = 'cart-pole.pkl'
+DIR_PATH = os.path.dirname(os.path.realpath(__file__))
+FULLNAME = '{}/{}'.format(DIR_PATH, 'save/cart-pole.pkl')
 
 
 def play():
     env = gym.make('CartPole-v1')
     ob = env.reset()
 
-    p = Population.load('cart-pole.pkl')
+    p = Population.load(FULLNAME)
 
     winner = p.get_winner()
 
@@ -26,14 +30,16 @@ def play():
 def train():
     env = gym.make('CartPole-v1')
 
-    p = Population(1000, env.observation_space.shape[0], env.action_space.n)
-    target_reward = 500
+    try:
+        p = Population.load(FULLNAME)
+    except RuntimeError as e:
+        print('unable to load file, starting from beginning')
+        p = Population(1000, env.observation_space.shape[0], env.action_space.n)
+
     max_reward = 0
-    winner = None
     while True:
         status = p.get_status()
         for s in status.keys():
-            output = []
             for i in range(status.get(s, 0)):
                 ob = env.reset()
                 reward_sum = 0
@@ -45,23 +51,13 @@ def train():
                         break
                 p.set_score(s, i, reward_sum)
                 max_reward = np.max([reward_sum, max_reward])
-                if max_reward >= target_reward:
-                    winner = (s, i)
-                    break
-            if max_reward >= target_reward:
-                break
-
         try:
-            p.save('cart-pole.pkl')
+            p.save(FULLNAME)
         except RuntimeError as e:
             print('error saving: {}'.format(str(e)))
 
         print(p.generation, max_reward, p.population.keys())
-        if max_reward >= target_reward:
-            break
         p.evolve()
-
-    print('Species {} is the winner'.format(winner[0]))
 
 
 def main(args):
@@ -75,5 +71,4 @@ def main(args):
 parser = argparse.ArgumentParser()
 
 parser.add_argument("command")
-
 main(parser.parse_args())

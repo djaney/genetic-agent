@@ -1,7 +1,6 @@
 import numpy as np
 import math
 import random
-import os
 import matplotlib.pyplot as plt
 from functools import reduce
 import pickle
@@ -53,14 +52,12 @@ class Population:
                                               species_distance_threshold=self.species_distance_threshold)
 
     def save(self, name):
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        with open('{}/save/{}'.format(dir_path, name), 'wb') as file:
+        with open(name, 'wb') as file:
             pickle.dump(self, file, pickle.HIGHEST_PROTOCOL)
 
     @staticmethod
     def load(name):
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        with open('{}/save/{}'.format(dir_path, name), 'rb') as file:
+        with open(name, 'rb') as file:
             return pickle.load(file)
 
     def get_winner(self):
