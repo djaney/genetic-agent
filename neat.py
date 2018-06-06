@@ -497,7 +497,11 @@ class Genome:
                 # get node behind that connection
                 if c.get_prev_node().get_value() is not None:
                     # value is sum if prev node value * weight
-                    value = value + c.get_prev_node().get_value() * c.get_weight()
+                    value = np.add(
+                        value, np.multiply(
+                            c.get_prev_node().get_value(), c.get_weight(), dtype=np.float64
+                        ),
+                        dtype=np.float64)
                 else:
                     c.set_skipped(True)
                 c.set_activated(True)
