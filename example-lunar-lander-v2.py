@@ -59,12 +59,13 @@ def train():
                     p.set_score(s, i, reward_sum)
                     max_reward = np.max([reward_sum, max_reward])
             print(p.generation, max_reward, p.population.keys())
+
             try:
                 print('\nsaving before exit')
                 p.save(AUTOSAVE)
-                sys.exit('Bye!')
             except RuntimeError as e:
                 print('error saving: {}'.format(str(e)))
+
             p.evolve()
 
         except KeyboardInterrupt as e:
