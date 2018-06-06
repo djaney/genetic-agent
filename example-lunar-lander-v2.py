@@ -61,7 +61,6 @@ def train():
             print(p.generation, max_reward, p.population.keys())
 
             try:
-                print('\nsaving before exit')
                 p.save(AUTOSAVE)
             except RuntimeError as e:
                 print('error saving: {}'.format(str(e)))
