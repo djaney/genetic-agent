@@ -27,8 +27,8 @@ def play():
 
 
 def print_population():
-    p = Population.load(FULLNAME)
-    Printer(p).print()
+    g = Population.load(FULLNAME).get_winner()
+    Printer(g).print()
 
 
 def train():
