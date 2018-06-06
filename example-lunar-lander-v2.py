@@ -26,7 +26,7 @@ def play():
             ob = env.reset()
 
 
-def print():
+def print_population():
     p = Population.load(FULLNAME)
     Printer(p).print()
 
@@ -78,8 +78,7 @@ def main(args):
         play()
 
     elif args.command == "print":
-        print()
-
+        print_population()
 
 
 parser = argparse.ArgumentParser()
