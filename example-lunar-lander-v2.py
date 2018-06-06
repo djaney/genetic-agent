@@ -36,9 +36,9 @@ def train():
         print('Creating new state')
         p = Population(1000, env.observation_space.shape[0], env.action_space.n)
 
-    max_reward = -99999
     while True:
         try:
+            max_reward = -99999
             status = p.get_status()
             for s in status.keys():
                 for i in range(status.get(s, 0)):
@@ -52,7 +52,6 @@ def train():
                             break
                     p.set_score(s, i, reward_sum)
                     max_reward = np.max([reward_sum, max_reward])
-            sys.stdout.write('\n')
             print(p.generation, max_reward, p.population.keys())
             p.evolve()
 

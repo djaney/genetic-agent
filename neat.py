@@ -220,44 +220,44 @@ class Population:
         population_size = len(pool)
         new_population = []
 
-        # if did improve during last 15
-        last_hist_list = [np.mean(g.score_history[-history_check:]) for g in pool if len(g.score_history) > 0]
-        last_score = np.max([g.score for g in pool])
-        last_hist_mean = np.mean(last_hist_list) if len(last_hist_list) > 0 else None
-        did_improved = last_hist_mean is None or last_hist_mean < last_score
-        if did_improved:
-            # breed top 40%
-            pool = sorted(pool, key=lambda x: x.score, reverse=True)
-            elite = pool[:math.ceil(population_size * elite_size)]
+        # # if did improve during last 15
+        # last_hist_list = [np.mean(g.score_history[-history_check:]) for g in pool if len(g.score_history) > 0]
+        # last_score = np.max([g.score for g in pool])
+        # last_hist_mean = np.mean(last_hist_list) if len(last_hist_list) > 0 else None
+        # did_improved = last_hist_mean is None or last_hist_mean < last_score
+        # if did_improved:
+        # breed top 40%
+        pool = sorted(pool, key=lambda x: x.score, reverse=True)
+        elite = pool[:math.ceil(population_size * elite_size)]
 
-            # copy champion of each species with minimum size
-            if population_size > champ_threshold:
-                new_population.append(pool[0])
+        # copy champion of each species with minimum size
+        if population_size > champ_threshold:
+            new_population.append(pool[0])
 
-            while len(new_population) < population_size:
-                if len(other_species) > 0 and random.random() < cross_breed:
-                    # chance to mate with other species
-                    cross_pool = [random.choice(elite)] + [random.choice(other_species)]
-                    cross_breed_offsprings = self.breed(cross_pool,
-                                                        generation,
-                                                        mutation,
-                                                        weight_update,
-                                                        new_node,
-                                                        new_link)
-                    new_population = new_population + cross_breed_offsprings
-                elif len(elite) > 1:
-                    # mate with own species
-                    elite_pool = random.sample(elite, 2)
-                    elite_breed_offspring = self.breed(elite_pool,
-                                                       generation,
-                                                       mutation,
-                                                       weight_update,
-                                                       new_node,
-                                                       new_link)
-                    new_population = new_population + elite_breed_offspring
+        while len(new_population) < population_size:
+            if len(other_species) > 0 and random.random() < cross_breed:
+                # chance to mate with other species
+                cross_pool = [random.choice(elite)] + [random.choice(other_species)]
+                cross_breed_offsprings = self.breed(cross_pool,
+                                                    generation,
+                                                    mutation,
+                                                    weight_update,
+                                                    new_node,
+                                                    new_link)
+                new_population = new_population + cross_breed_offsprings
+            elif len(elite) > 1:
+                # mate with own species
+                elite_pool = random.sample(elite, 2)
+                elite_breed_offspring = self.breed(elite_pool,
+                                                   generation,
+                                                   mutation,
+                                                   weight_update,
+                                                   new_node,
+                                                   new_link)
+                new_population = new_population + elite_breed_offspring
 
-        else:
-            new_population = pool
+        # else:
+        #     new_population = pool
 
         return new_population
 
