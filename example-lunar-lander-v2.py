@@ -54,6 +54,7 @@ def train():
                     p.set_score(s, i, reward_sum)
                     max_reward = np.max([reward_sum, max_reward])
                     sys.stdout.write('.')
+                    sys.stdout.flush()
             sys.stdout.write('\n')
             print(p.generation, max_reward, p.population.keys())
             p.evolve()
