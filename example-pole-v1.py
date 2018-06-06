@@ -24,7 +24,7 @@ def play():
         ob, reward, done, info = env.step(np.argmax(action))
         env.render()
         if done:
-            break
+            ob = env.reset()
 
 
 def train():
@@ -32,32 +32,40 @@ def train():
 
     try:
         p = Population.load(FULLNAME)
-    except RuntimeError as e:
-        print('unable to load file, starting from beginning')
+        print('Existing state loaded')
+    except FileNotFoundError as e:
+        print('Creating new state')
         p = Population(1000, env.observation_space.shape[0], env.action_space.n)
 
     max_reward = 0
     while True:
-        status = p.get_status()
-        for s in status.keys():
-            for i in range(status.get(s, 0)):
-                ob = env.reset()
-                reward_sum = 0
-                while True:
-                    action = p.run(s, i, ob)
-                    ob, reward, done, info = env.step(np.argmax(action))
-                    reward_sum = reward_sum + reward
-                    if done:
-                        break
-                p.set_score(s, i, reward_sum)
-                max_reward = np.max([reward_sum, max_reward])
         try:
-            p.save(FULLNAME)
-        except RuntimeError as e:
-            print('error saving: {}'.format(str(e)))
 
-        print(p.generation, max_reward, p.population.keys())
-        p.evolve()
+            status = p.get_status()
+            for s in status.keys():
+                for i in range(status.get(s, 0)):
+                    ob = env.reset()
+                    reward_sum = 0
+                    while True:
+                        action = p.run(s, i, ob)
+                        ob, reward, done, info = env.step(np.argmax(action))
+                        reward_sum = reward_sum + reward
+                        if done:
+                            break
+                    p.set_score(s, i, reward_sum)
+                    max_reward = np.max([reward_sum, max_reward])
+
+            print(p.generation, max_reward, p.population.keys())
+            p.evolve()
+
+        except KeyboardInterrupt as e:
+
+            try:
+                print('\nsaving before exit')
+                p.save(FULLNAME)
+                sys.exit('Bye!')
+            except RuntimeError as e:
+                print('error saving: {}'.format(str(e)))
 
 
 def main(args):
