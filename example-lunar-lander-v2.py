@@ -39,7 +39,7 @@ def train():
     max_reward = -99999
     while True:
         try:
-
+            print('Generation {}'.format(p.generation))
             status = p.get_status()
             for s in status.keys():
                 for i in range(status.get(s, 0)):
@@ -56,7 +56,7 @@ def train():
                     sys.stdout.write('.')
                     sys.stdout.flush()
             sys.stdout.write('\n')
-            print(p.generation, max_reward, p.population.keys())
+            print(max_reward, p.population.keys())
             p.evolve()
 
         except KeyboardInterrupt as e:
