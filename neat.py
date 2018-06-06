@@ -258,7 +258,7 @@ class Population:
 
         # else:
         #     new_population = pool
-
+        print(new_population)
         return new_population
 
     def evolve(self):
