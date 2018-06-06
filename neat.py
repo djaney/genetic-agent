@@ -491,7 +491,7 @@ class Genome:
         for n in nodes:
             if n.get_type() == Node.TYPE_INPUT:
                 continue
-            value = 0
+            value = np.float64(0)
             # get each connection
             for c in n.get_prev_connections():
                 # get node behind that connection
@@ -503,7 +503,7 @@ class Genome:
                 c.set_activated(True)
             # then add bias and sigmoid
             # value = 1 / (1 + math.exp(-value)) + n.get_bias()
-            value = np.max([0, value]) + n.get_bias()
+            value = np.add(np.max([0, value]), n.get_bias(), dtype=np.float64)
             n.set_activated(True)
             n.set_value(value)
 
@@ -572,7 +572,7 @@ class Node:
         self.value = None
 
     def set_value(self, value):
-        self.value = value
+        self.value = np.float(value)
 
     def get_value(self):
         return self.value
@@ -584,7 +584,7 @@ class Node:
         return self.activated
 
     def set_bias(self, bias):
-        self.bias = bias
+        self.bias = np.float64(bias)
 
     def get_bias(self):
         return self.bias
@@ -676,7 +676,7 @@ class Connections:
         return self.weight
 
     def set_weight(self, weight):
-        self.weight = weight
+        self.weight = np.float64(weight)
 
 
 class Printer:
