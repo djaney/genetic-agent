@@ -152,9 +152,9 @@ class Population:
         return new_species
 
     def breed(self, population, generation, mutation, weight_update, new_node, new_link):
-        initial_size = len(population)
+        output_size = 1
         new_population = []
-        for _ in range(initial_size):
+        for _ in range(output_size):
             sample = random.sample(population, 2)
             a1, a2 = Population.align_genome(sample[0], sample[1])
             g = Population.crossover(a1, a2, sample[0].get_input_nodes(), sample[0].get_output_nodes())
@@ -259,7 +259,6 @@ class Population:
         else:
             new_population = pool
 
-        new_population = new_population + pool[population_size - len(new_population):]
 
         return new_population
 

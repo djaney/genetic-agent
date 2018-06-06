@@ -34,15 +34,13 @@ def train():
         print('Existing state loaded')
     except FileNotFoundError as e:
         print('Creating new state')
-        p = Population(200, env.observation_space.shape[0], env.action_space.n)
+        p = Population(1000, env.observation_space.shape[0], env.action_space.n)
 
     max_reward = -99999
     while True:
         try:
-            print('Generation {}'.format(p.generation))
             status = p.get_status()
             for s in status.keys():
-                print('Species {} Genes {}'.format(s, status.get(s, 0)))
                 for i in range(status.get(s, 0)):
                     ob = env.reset()
                     reward_sum = 0
@@ -55,7 +53,7 @@ def train():
                     p.set_score(s, i, reward_sum)
                     max_reward = np.max([reward_sum, max_reward])
             sys.stdout.write('\n')
-            print(max_reward, p.population.keys())
+            print(p.generation, max_reward, p.population.keys())
             p.evolve()
 
         except KeyboardInterrupt as e:
