@@ -8,6 +8,7 @@ from neat import Population, Printer
 sys.setrecursionlimit(2000)
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 FULLNAME = '{}/{}'.format(DIR_PATH, 'save/lunar-lander.pkl')
+AUTOSAVE = '{}/{}'.format(DIR_PATH, 'save/lunar-lander-autosave.pkl')
 
 
 def play():
@@ -58,6 +59,12 @@ def train():
                     p.set_score(s, i, reward_sum)
                     max_reward = np.max([reward_sum, max_reward])
             print(p.generation, max_reward, p.population.keys())
+            try:
+                print('\nsaving before exit')
+                p.save(AUTOSAVE)
+                sys.exit('Bye!')
+            except RuntimeError as e:
+                print('error saving: {}'.format(str(e)))
             p.evolve()
 
         except KeyboardInterrupt as e:
