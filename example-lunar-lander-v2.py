@@ -26,6 +26,11 @@ def play():
             ob = env.reset()
 
 
+def print():
+    p = Population.load(FULLNAME)
+    Printer(p).print()
+
+
 def train():
     env = gym.make('LunarLander-v2')
 
@@ -71,6 +76,10 @@ def main(args):
 
     elif args.command == "play":
         play()
+
+    elif args.command == "print":
+        print()
+
 
 
 parser = argparse.ArgumentParser()
