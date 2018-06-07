@@ -12,7 +12,7 @@ AUTOSAVE = '{}/{}'.format(DIR_PATH, 'save/lunar-lander-autosave.pkl')
 
 
 def play():
-    env = gym.make('LunarLander-v2')
+    env = gym.make('LunarLanderContinuous-v2')
     ob = env.reset()
 
     p = Population.load(FULLNAME)
@@ -21,7 +21,8 @@ def play():
 
     while True:
         action = winner.run(ob)
-        ob, reward, done, info = env.step(np.argmax(action))
+        action = np.array([sigmoid(a) for a in action])
+        ob, reward, done, info = env.step(action)
         env.render()
         if done:
             ob = env.reset()
@@ -33,14 +34,14 @@ def print_population():
 
 
 def train():
-    env = gym.make('LunarLander-v2')
+    env = gym.make('LunarLanderContinuous-v2')
 
     try:
         p = Population.load(FULLNAME)
         print('Existing state loaded')
     except FileNotFoundError as e:
-        print('Creating new state')
-        p = Population(1000, env.observation_space.shape[0], env.action_space.n)
+        print(str(e) + '. Creating new state')
+        p = Population(1000, env.observation_space.shape[0], env.action_space.shape[0])
 
     while True:
         try:
@@ -52,7 +53,8 @@ def train():
                     reward_sum = 0
                     while True:
                         action = p.run(s, i, ob)
-                        ob, reward, done, info = env.step(np.argmax(action))
+                        action = np.array([sigmoid(a) for a in action])
+                        ob, reward, done, info = env.step(action)
                         reward_sum = reward_sum + reward
                         if done:
                             break
@@ -75,6 +77,12 @@ def train():
                 sys.exit('Bye!')
             except RuntimeError as e:
                 print('error saving: {}'.format(str(e)))
+
+
+def sigmoid(x, derivative=False):
+    if derivative:
+        return x * (1 - x)
+    return 1 / (1 + np.exp(-x))
 
 
 def main(args):
