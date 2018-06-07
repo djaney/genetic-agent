@@ -504,7 +504,7 @@ class Genome:
                 c.set_activated(True)
             # then add bias and sigmoid
             # value = 1 / (1 + math.exp(-value)) + n.get_bias()
-            value = np.add(np.max([0, value]), n.get_bias(), dtype=np.float64)
+            value = np.add(math.tanh(value), n.get_bias(), dtype=np.float64)
             n.set_activated(True)
             n.set_value(value)
 
