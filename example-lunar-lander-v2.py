@@ -20,8 +20,7 @@ def play():
     winner = p.get_winner()
 
     while True:
-        action = winner.run(ob)
-        action = np.array([sigmoid(a) for a in action])
+        action = action_final_activation(winner.run(ob))
         ob, reward, done, info = env.step(action)
         env.render()
         if done:
@@ -31,6 +30,10 @@ def play():
 def print_population():
     g = Population.load(FULLNAME).get_winner()
     Printer(g).print()
+
+
+def action_final_activation(action):
+    return np.array([np.clip(a, -1, 1) for a in action])
 
 
 def train():
@@ -52,8 +55,7 @@ def train():
                     ob = env.reset()
                     reward_sum = 0
                     while True:
-                        action = p.run(s, i, ob)
-                        action = np.array([sigmoid(a) for a in action])
+                        action = action_final_activation(p.run(s, i, ob))
                         ob, reward, done, info = env.step(action)
                         reward_sum = reward_sum + reward
                         if done:

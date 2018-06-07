@@ -25,8 +25,13 @@ def random_initializer():
     return random.random();
 
 
+def relu(x):
+    return np.max([0, x])
+
+
 class Population:
-    def __init__(self, size, inputs, outputs, c1=1.0, c2=1.0, c3=3.0, species_distance_threshold=4.0, initializer=None):
+    def __init__(self, size, inputs, outputs, c1=1.0, c2=1.0, c3=3.0, species_distance_threshold=4.0, initializer=None,
+                 activation=None):
 
         self.c1 = c1
         self.c2 = c2
@@ -37,13 +42,19 @@ class Population:
         self.conn_innovation = 1
         self.generation = 1
         self.population = {}
+
+        if activation is None:
+            self.activation = relu
+        else:
+            self.activation = activation
+
         population = []
 
         if initializer is None:
             initializer = random_initializer
 
         for _ in range(size):
-            population.append(Genome(inputs, outputs, initializer=initializer))
+            population.append(Genome(inputs, outputs, initializer=initializer, activation=self.activation))
 
         self.population = Population.speciate(population, self.population,
                                               c1=self.c1,
@@ -81,7 +92,7 @@ class Population:
         self.population.get(s)[i].set_score(score)
 
     @staticmethod
-    def crossover(a1, a2, input_nodes, output_nodes):
+    def crossover(a1, a2, input_nodes, output_nodes, activation=None):
         if len(a1) != len(a2):
             raise Exception('inputs not the same length')
 
@@ -100,7 +111,7 @@ class Population:
             else:
                 # disjoint
                 pass
-        child_genome = Genome(0, 0)
+        child_genome = Genome(0, 0, activation=activation)
 
         for c in child_connections:
             prev_node = c.get_prev_node()
@@ -157,7 +168,7 @@ class Population:
         for _ in range(output_size):
             sample = random.sample(population, 2)
             a1, a2 = Population.align_genome(sample[0], sample[1])
-            g = Population.crossover(a1, a2, sample[0].get_input_nodes(), sample[0].get_output_nodes())
+            g = Population.crossover(a1, a2, sample[0].get_input_nodes(), sample[0].get_output_nodes(), activation=self.activation)
             g.generation = generation
             new_population.append(g)
         # new_population = population
@@ -282,12 +293,16 @@ class Population:
 
 
 class Genome:
-    def __init__(self, input_count, output_count, initializer=None):
+    def __init__(self, input_count, output_count, initializer=None, activation=None):
         self.nodes = []
         self.connections = []
         self.score_history = []
         self.score = 0
         self.generation = 1
+        if activation is None:
+            self.activation = relu
+        else:
+            self.activation = activation
 
         if initializer is None:
             self.initializer = random_initializer
@@ -504,7 +519,7 @@ class Genome:
                 c.set_activated(True)
             # then add bias and sigmoid
             # value = 1 / (1 + math.exp(-value)) + n.get_bias()
-            value = np.add(math.tanh(value), n.get_bias(), dtype=np.float64)
+            value = np.add(self.activation(value), n.get_bias(), dtype=np.float64)
             n.set_activated(True)
             n.set_value(value)
 
