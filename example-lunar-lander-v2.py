@@ -21,6 +21,7 @@ def play():
 
     while True:
         action = action_final_activation(winner.run(ob))
+        print('Action: {}'.format(action))
         ob, reward, done, info = env.step(action)
         env.render()
         if done:
