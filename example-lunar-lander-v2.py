@@ -45,7 +45,7 @@ def train():
         print('Existing state loaded')
     except FileNotFoundError as e:
         print(str(e) + '. Creating new state')
-        p = Population(1000, env.observation_space.shape[0], env.action_space.shape[0])
+        p = Population(200, env.observation_space.shape[0], env.action_space.shape[0])
 
     while True:
         try:
